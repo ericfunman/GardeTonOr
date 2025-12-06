@@ -1,0 +1,27 @@
+# Core dependencies
+streamlit==1.29.0
+sqlalchemy==2.0.23
+openai==1.6.1
+pydantic==2.5.2
+
+# PDF processing
+pypdf2==3.0.1
+pdfplumber==0.10.3
+
+# Database
+alembic==1.13.0
+
+# Testing
+pytest==7.4.3
+pytest-cov==4.1.0
+pytest-mock==3.12.0
+
+# Code quality
+black==23.12.0
+flake8==6.1.0
+mypy==1.7.1
+
+# Utilities
+python-dotenv==1.0.0
+pandas==2.1.4
+plotly==5.18.0
