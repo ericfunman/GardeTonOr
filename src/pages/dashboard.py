@@ -102,8 +102,7 @@ def show():
         if not contracts:
             st.info("Aucun contrat enregistré. Commencez par ajouter un contrat !")
             if st.button("➕ Ajouter mon premier contrat"):
-                st.session_state["page"] = "add"
-                st.rerun()
+                st.switch_page("pages/add_contract.py")
         else:
             # Tableau des contrats
             contracts_data = []
@@ -117,6 +116,12 @@ def show():
                         cost = f"{contract.contract_data.get('prime_mensuelle', 0):.2f} €/mois"
                     else:
                         cost = f"{contract.contract_data.get('prime_annuelle', 0):.2f} €/an"
+                elif contract.contract_type in ["electricite", "gaz"]:
+                    if contract.contract_data.get('estimation_facture_annuelle'):
+                        cost_annual = contract.contract_data.get('estimation_facture_annuelle', 0)
+                        cost = f"{cost_annual:.2f} €/an ({cost_annual/12:.2f} €/mois)"
+                    elif contract.contract_data.get('prix_abonnement_mensuel'):
+                        cost = f"{contract.contract_data.get('prix_abonnement_mensuel', 0):.2f} €/mois"
                 
                 contracts_data.append({
                     "ID": contract.id,

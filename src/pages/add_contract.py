@@ -183,6 +183,86 @@ def show():
                     "conditions_particulieres": conditions
                 }
             
+            elif contract_type == "electricite":
+                col1, col2 = st.columns(2)
+                
+                with col1:
+                    provider = st.text_input("Fournisseur", value=extracted_data.get("fournisseur", ""))
+                    numero_contrat = st.text_input("Numéro de contrat", value=extracted_data.get("numero_contrat", ""))
+                    type_offre = st.text_input("Type d'offre", value=extracted_data.get("type_offre", ""))
+                    puissance_kva = st.number_input("Puissance souscrite (kVA)", value=float(extracted_data.get("puissance_souscrite_kva", 0)), min_value=0.0)
+                    option_tarifaire = st.text_input("Option tarifaire", value=extracted_data.get("option_tarifaire", "Base"))
+                    pdl = st.text_input("Numéro PDL", value=extracted_data.get("pdl", ""))
+                
+                with col2:
+                    prix_abo = st.number_input("Abonnement mensuel (€)", value=float(extracted_data.get("prix_abonnement_mensuel", 0)), min_value=0.0, step=0.01)
+                    
+                    prix_kwh_data = extracted_data.get("prix_kwh", {})
+                    prix_kwh_base = st.number_input("Prix kWh Base (€)", value=float(prix_kwh_data.get("base", 0)), min_value=0.0, step=0.001, format="%.4f")
+                    
+                    conso_annuelle = st.number_input("Consommation annuelle (kWh)", value=float(extracted_data.get("estimation_conso_annuelle_kwh", 0)), min_value=0.0)
+                    
+                    date_debut = st.date_input("Date de début", value=datetime.strptime(extracted_data.get("date_debut", datetime.now().strftime("%Y-%m-%d")), "%Y-%m-%d"))
+                    date_anniversaire = st.date_input("Date anniversaire", value=datetime.strptime(extracted_data.get("date_anniversaire", datetime.now().strftime("%Y-%m-%d")), "%Y-%m-%d"))
+                
+                adresse = st.text_input("Adresse de fourniture", value=extracted_data.get("adresse_fourniture", ""))
+                conditions = st.text_area("Conditions de résiliation", value=extracted_data.get("conditions_resiliation", ""))
+                
+                validated_data = {
+                    "fournisseur": provider,
+                    "numero_contrat": numero_contrat,
+                    "type_offre": type_offre,
+                    "puissance_souscrite_kva": puissance_kva,
+                    "option_tarifaire": option_tarifaire,
+                    "prix_abonnement_mensuel": prix_abo,
+                    "prix_kwh": {"base": prix_kwh_base},
+                    "adresse_fourniture": adresse,
+                    "pdl": pdl,
+                    "date_debut": date_debut.strftime("%Y-%m-%d"),
+                    "date_anniversaire": date_anniversaire.strftime("%Y-%m-%d"),
+                    "estimation_conso_annuelle_kwh": conso_annuelle,
+                    "estimation_facture_annuelle": (prix_abo * 12) + (prix_kwh_base * conso_annuelle),
+                    "conditions_resiliation": conditions
+                }
+            
+            elif contract_type == "gaz":
+                col1, col2 = st.columns(2)
+                
+                with col1:
+                    provider = st.text_input("Fournisseur", value=extracted_data.get("fournisseur", ""))
+                    numero_contrat = st.text_input("Numéro de contrat", value=extracted_data.get("numero_contrat", ""))
+                    type_offre = st.text_input("Type d'offre", value=extracted_data.get("type_offre", ""))
+                    classe_conso = st.text_input("Classe de consommation", value=extracted_data.get("classe_consommation", "Base"))
+                    pce = st.text_input("Numéro PCE", value=extracted_data.get("pce", ""))
+                
+                with col2:
+                    prix_abo = st.number_input("Abonnement mensuel (€)", value=float(extracted_data.get("prix_abonnement_mensuel", 0)), min_value=0.0, step=0.01)
+                    prix_kwh = st.number_input("Prix kWh (€)", value=float(extracted_data.get("prix_kwh", 0)), min_value=0.0, step=0.001, format="%.4f")
+                    
+                    conso_annuelle = st.number_input("Consommation annuelle (kWh)", value=float(extracted_data.get("estimation_conso_annuelle_kwh", 0)), min_value=0.0)
+                    
+                    date_debut = st.date_input("Date de début", value=datetime.strptime(extracted_data.get("date_debut", datetime.now().strftime("%Y-%m-%d")), "%Y-%m-%d"))
+                    date_anniversaire = st.date_input("Date anniversaire", value=datetime.strptime(extracted_data.get("date_anniversaire", datetime.now().strftime("%Y-%m-%d")), "%Y-%m-%d"))
+                
+                adresse = st.text_input("Adresse de fourniture", value=extracted_data.get("adresse_fourniture", ""))
+                conditions = st.text_area("Conditions de résiliation", value=extracted_data.get("conditions_resiliation", ""))
+                
+                validated_data = {
+                    "fournisseur": provider,
+                    "numero_contrat": numero_contrat,
+                    "type_offre": type_offre,
+                    "classe_consommation": classe_conso,
+                    "prix_abonnement_mensuel": prix_abo,
+                    "prix_kwh": prix_kwh,
+                    "adresse_fourniture": adresse,
+                    "pce": pce,
+                    "date_debut": date_debut.strftime("%Y-%m-%d"),
+                    "date_anniversaire": date_anniversaire.strftime("%Y-%m-%d"),
+                    "estimation_conso_annuelle_kwh": conso_annuelle,
+                    "estimation_facture_annuelle": (prix_abo * 12) + (prix_kwh * conso_annuelle),
+                    "conditions_resiliation": conditions
+                }
+            
             # Boutons de soumission
             col1, col2 = st.columns(2)
             with col1:

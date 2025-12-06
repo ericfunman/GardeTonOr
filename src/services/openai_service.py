@@ -26,10 +26,11 @@ class OpenAIService:
     def extract_contract_data(self, pdf_text: str, contract_type: str) -> Dict[str, Any]:
         """
         Extrait les données structurées d'un contrat à partir du texte PDF.
+        Utilise un schéma JSON générique normalisé.
 
         Args:
             pdf_text: Texte extrait du PDF
-            contract_type: Type de contrat (telephone, assurance_pno)
+            contract_type: Type de contrat (telephone, assurance_pno, electricite, gaz)
 
         Returns:
             Dictionnaire contenant les données extraites
@@ -37,7 +38,9 @@ class OpenAIService:
         Raises:
             Exception: Si l'extraction échoue
         """
-        prompt = self._build_extraction_prompt(contract_type, pdf_text)
+        # Obtenir le schéma générique
+        schema = self._get_contract_schema(contract_type)
+        prompt = self._build_extraction_prompt(contract_type, pdf_text, schema)
         
         try:
             response = self.client.chat.completions.create(
@@ -45,9 +48,9 @@ class OpenAIService:
                 messages=[
                     {
                         "role": "system",
-                        "content": "Tu es un assistant expert en analyse de contrats. "
-                        "Tu dois extraire les informations clés d'un contrat et les retourner "
-                        "au format JSON structuré. Sois précis et exhaustif."
+                        "content": "Tu es un expert en analyse de contrats. "
+                        "Tu extrais les données de manière précise et structurée en JSON. "
+                        "Respecte EXACTEMENT le schéma fourni."
                     },
                     {"role": "user", "content": prompt}
                 ],
@@ -56,12 +59,20 @@ class OpenAIService:
             )
             
             result = response.choices[0].message.content
+            
+            # Nettoyer le JSON si nécessaire
+            if "```json" in result:
+                result = result.split("```json")[1].split("```")[0].strip()
+            elif "```" in result:
+                result = result.split("```")[1].split("```")[0].strip()
+            
             extracted_data = json.loads(result)
             
             return {
                 "data": extracted_data,
                 "prompt": prompt,
-                "raw_response": result
+                "raw_response": result,
+                "schema": schema
             }
         
         except Exception as e:
@@ -165,8 +176,131 @@ class OpenAIService:
         except Exception as e:
             raise Exception(f"Erreur lors de la comparaison avec concurrent: {str(e)}")
 
-    def _build_extraction_prompt(self, contract_type: str, pdf_text: str) -> str:
-        """Construit le prompt pour l'extraction de données."""
+    def _get_contract_schema(self, contract_type: str) -> Dict[str, Any]:
+        """Retourne le schéma JSON générique normalisé selon le type de contrat."""
+        
+        # Schéma de base commun à tous les contrats
+        base_schema = {
+            "type_contrat": contract_type,
+            "fournisseur": "",
+            "numero_contrat": "",
+            "client": {
+                "noms": [],
+                "email": "",
+                "telephone": "",
+                "date_naissance": "",
+                "reference_client": ""
+            },
+            "dates": {
+                "signature_contrat": "",
+                "date_debut": "",
+                "date_anniversaire": "",
+                "retractation_limite": ""
+            },
+            "paiements": {
+                "mode": "",
+                "date_prelevement": ""
+            },
+            "service_client": {
+                "tel_souscription": "",
+                "tel_service_client": "",
+                "contact_courrier": ""
+            }
+        }
+        
+        if contract_type == "electricite":
+            base_schema.update({
+                "adresses": {
+                    "site_de_consommation": "",
+                    "adresse_facturation": ""
+                },
+                "electricite": {
+                    "pdl": "",
+                    "puissance_souscrite_kva": None,
+                    "option_tarifaire": "",
+                    "matricule_compteur": "",
+                    "date_debut_previsionnelle": "",
+                    "tarifs": {
+                        "abonnement_mensuel_ttc": None,
+                        "prix_kwh_ht": None,
+                        "prix_kwh_ttc": None
+                    },
+                    "promotion": {
+                        "remise_kwh_ht_percent": None,
+                        "duree_mois": None
+                    },
+                    "consommation_estimee_annuelle_kwh": None,
+                    "budget_annuel_estime_ttc": None
+                },
+                "paiements": {
+                    "mensualite_electricite_ttc": None,
+                    "mode": "",
+                    "date_prelevement": ""
+                }
+            })
+        
+        elif contract_type == "gaz":
+            base_schema.update({
+                "adresses": {
+                    "site_de_consommation": "",
+                    "adresse_facturation": ""
+                },
+                "gaz": {
+                    "pce": "",
+                    "option_tarifaire": "",
+                    "zone_tarifaire": None,
+                    "matricule_compteur": "",
+                    "date_debut_previsionnelle": "",
+                    "tarifs": {
+                        "abonnement_mensuel_ttc": None,
+                        "prix_kwh_ht": None,
+                        "prix_kwh_ttc": None
+                    },
+                    "promotion": {
+                        "remise_kwh_ht_percent": None,
+                        "duree_mois": None
+                    },
+                    "consommation_estimee_annuelle_kwh": None,
+                    "budget_annuel_estime_ttc": None
+                },
+                "paiements": {
+                    "mensualite_gaz_ttc": None,
+                    "mode": "",
+                    "date_prelevement": ""
+                }
+            })
+        
+        return base_schema
+
+    def _build_extraction_prompt(self, contract_type: str, pdf_text: str, schema: Dict[str, Any] = None) -> str:
+        """Construit le prompt pour l'extraction de données avec schéma générique."""
+        
+        if schema is None:
+            schema = self._get_contract_schema(contract_type)
+        
+        base_instructions = f"""Analyse ce contrat de type '{contract_type}' et extrais TOUTES les informations disponibles.
+
+SCHÉMA JSON ATTENDU (respecte-le EXACTEMENT) :
+{json.dumps(schema, indent=2, ensure_ascii=False)}
+
+RÈGLES IMPORTANTES :
+1. Extrais TOUTES les informations trouvées dans le document
+2. Pour les champs non trouvés, mets null (pas de string vide)
+3. Respecte les types de données (nombres pour les montants, pas de string)
+4. Dates au format DD/MM/YYYY
+5. Pour les listes (noms, garanties, etc.), utilise des arrays
+6. Sois précis sur les montants (avec décimales)
+7. Réponds UNIQUEMENT avec du JSON valide, sans texte avant ou après
+
+CONTENU DU CONTRAT :
+{pdf_text}
+
+JSON de réponse :"""
+        
+        return base_instructions
+
+    def _build_extraction_prompt_legacy(self, contract_type: str, pdf_text: str) -> str:
+        """Version legacy du prompt (pour compatibilité)."""
         
         if contract_type == "telephone":
             return f"""Analyse ce contrat de téléphonie mobile et extrais les informations suivantes au format JSON:
@@ -220,6 +354,67 @@ Réponds uniquement avec le JSON, sans texte additionnel."""
     "mode_paiement": "mode de paiement (mensuel, annuel, etc.)",
     "conditions_particulieres": "conditions particulières importantes",
     "resiliation": "conditions et délais de résiliation"
+}}
+
+Texte du contrat:
+{pdf_text}
+
+Réponds uniquement avec le JSON, sans texte additionnel."""
+
+        elif contract_type == "electricite":
+            return f"""Analyse ce contrat d'électricité et extrais les informations suivantes au format JSON:
+
+{{
+    "fournisseur": "nom du fournisseur",
+    "numero_contrat": "numéro de contrat ou référence client",
+    "type_offre": "nom de l'offre (ex: Offre Online, Tarif Bleu, etc.)",
+    "puissance_souscrite_kva": puissance souscrite en kVA (nombre),
+    "option_tarifaire": "option tarifaire (Base, Heures Pleines/Heures Creuses, Tempo, etc.)",
+    "prix_abonnement_mensuel": prix de l'abonnement mensuel en euros (nombre),
+    "prix_kwh": {{
+        "base": prix du kWh en base en euros (nombre) si applicable,
+        "heures_pleines": prix du kWh heures pleines en euros (nombre) si applicable,
+        "heures_creuses": prix du kWh heures creuses en euros (nombre) si applicable
+    }},
+    "adresse_fourniture": "adresse du point de livraison",
+    "pdl": "numéro de Point De Livraison (14 chiffres)",
+    "date_debut": "date de début du contrat au format YYYY-MM-DD",
+    "date_fin": "date de fin si contrat à durée déterminée au format YYYY-MM-DD",
+    "date_anniversaire": "date anniversaire au format YYYY-MM-DD",
+    "duree_engagement": "durée d'engagement en mois (0 si sans engagement)",
+    "mode_paiement": "mode de paiement (prélèvement, virement, etc.)",
+    "estimation_conso_annuelle_kwh": estimation de consommation annuelle en kWh (nombre),
+    "estimation_facture_annuelle": estimation de la facture annuelle en euros (nombre),
+    "options": ["liste des options incluses"],
+    "conditions_resiliation": "conditions de résiliation"
+}}
+
+Texte du contrat:
+{pdf_text}
+
+Réponds uniquement avec le JSON, sans texte additionnel."""
+
+        elif contract_type == "gaz":
+            return f"""Analyse ce contrat de gaz naturel et extrais les informations suivantes au format JSON:
+
+{{
+    "fournisseur": "nom du fournisseur",
+    "numero_contrat": "numéro de contrat ou référence client",
+    "type_offre": "nom de l'offre",
+    "classe_consommation": "classe de consommation (Base, B0, B1, B2i, etc.)",
+    "prix_abonnement_mensuel": prix de l'abonnement mensuel en euros (nombre),
+    "prix_kwh": prix du kWh de gaz en euros (nombre),
+    "adresse_fourniture": "adresse du point de livraison",
+    "pce": "numéro de Point de Comptage et d'Estimation (14 chiffres)",
+    "date_debut": "date de début du contrat au format YYYY-MM-DD",
+    "date_fin": "date de fin si contrat à durée déterminée au format YYYY-MM-DD",
+    "date_anniversaire": "date anniversaire au format YYYY-MM-DD",
+    "duree_engagement": "durée d'engagement en mois (0 si sans engagement)",
+    "mode_paiement": "mode de paiement (prélèvement, virement, etc.)",
+    "estimation_conso_annuelle_kwh": estimation de consommation annuelle en kWh (nombre),
+    "estimation_facture_annuelle": estimation de la facture annuelle en euros (nombre),
+    "options": ["liste des options incluses"],
+    "conditions_resiliation": "conditions de résiliation"
 }}
 
 Texte du contrat:
@@ -304,6 +499,84 @@ Fournis une analyse au format JSON avec:
 }}
 
 Base-toi sur les offres réelles des assureurs français (Allianz, AXA, Generali, MAIF, MACIF, Groupama, etc.)."""
+
+        elif contract_type == "electricite":
+            return f"""Analyse ce contrat d'électricité et compare-le avec les offres actuelles du marché français en décembre 2025.
+
+Contrat actuel:
+{contract_json}
+
+Fournis une analyse au format JSON avec:
+{{
+    "cout_annuel_actuel": coût annuel estimé actuel (nombre),
+    "estimation_marche": {{
+        "cout_min": coût annuel minimum trouvable pour une consommation similaire (nombre),
+        "cout_moyen": coût annuel moyen du marché (nombre),
+        "cout_max": coût annuel maximum (nombre)
+    }},
+    "economie_potentielle_annuelle": économie annuelle possible en euros (nombre, peut être négative),
+    "prix_kwh_marche": {{
+        "min": prix du kWh minimum sur le marché (nombre),
+        "moyen": prix du kWh moyen (nombre),
+        "max": prix du kWh maximum (nombre)
+    }},
+    "offres_similaires": [
+        {{
+            "fournisseur": "nom",
+            "offre": "nom de l'offre",
+            "abonnement_mensuel": prix abonnement (nombre),
+            "prix_kwh": prix du kWh (nombre),
+            "cout_annuel_estime": coût annuel estimé (nombre),
+            "avantages": ["liste des avantages"],
+            "inconvenients": ["liste des inconvénients"]
+        }}
+    ],
+    "points_attention": ["points importants à vérifier"],
+    "recommandation": "recommendation claire (garder/changer)",
+    "justification": "explication détaillée",
+    "niveau_competitivite": "excellent/bon/moyen/faible"
+}}
+
+Base-toi sur les offres réelles des fournisseurs français (EDF, Engie, TotalEnergies, Ekwateur, OHM Énergie, etc.)."""
+
+        elif contract_type == "gaz":
+            return f"""Analyse ce contrat de gaz naturel et compare-le avec les offres actuelles du marché français en décembre 2025.
+
+Contrat actuel:
+{contract_json}
+
+Fournis une analyse au format JSON avec:
+{{
+    "cout_annuel_actuel": coût annuel estimé actuel (nombre),
+    "estimation_marche": {{
+        "cout_min": coût annuel minimum trouvable pour une consommation similaire (nombre),
+        "cout_moyen": coût annuel moyen du marché (nombre),
+        "cout_max": coût annuel maximum (nombre)
+    }},
+    "economie_potentielle_annuelle": économie annuelle possible en euros (nombre, peut être négative),
+    "prix_kwh_marche": {{
+        "min": prix du kWh minimum sur le marché (nombre),
+        "moyen": prix du kWh moyen (nombre),
+        "max": prix du kWh maximum (nombre)
+    }},
+    "offres_similaires": [
+        {{
+            "fournisseur": "nom",
+            "offre": "nom de l'offre",
+            "abonnement_mensuel": prix abonnement (nombre),
+            "prix_kwh": prix du kWh (nombre),
+            "cout_annuel_estime": coût annuel estimé (nombre),
+            "avantages": ["liste des avantages"],
+            "inconvenients": ["liste des inconvénients"]
+        }}
+    ],
+    "points_attention": ["points importants à vérifier"],
+    "recommandation": "recommendation claire (garder/changer)",
+    "justification": "explication détaillée",
+    "niveau_competitivite": "excellent/bon/moyen/faible"
+}}
+
+Base-toi sur les offres réelles des fournisseurs français (Engie, TotalEnergies, EDF, Eni, Ekwateur, etc.)."""
 
         else:
             raise ValueError(f"Type de contrat non supporté: {contract_type}")

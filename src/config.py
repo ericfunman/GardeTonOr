@@ -26,6 +26,8 @@ NOTIFICATION_DAYS_BEFORE = int(os.getenv("NOTIFICATION_DAYS_BEFORE", "40"))
 CONTRACT_TYPES = {
     "telephone": "Téléphone",
     "assurance_pno": "Assurance PNO",
+    "electricite": "Électricité",
+    "gaz": "Gaz",
 }
 
 # Configuration Streamlit
