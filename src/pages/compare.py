@@ -143,7 +143,11 @@ def show():
 
 def display_market_analysis(comparison):
     """Affiche les résultats d'une analyse de marché."""
-    result = comparison.comparison_result
+    full_result = comparison.comparison_result
+    
+    # Support for new structure with "analyse" and "meilleure_offre"
+    result = full_result.get("analyse", full_result)
+    best_offer_data = full_result.get("meilleure_offre")
     
     # Recommandation principale
     recommandation = result.get("recommandation", "")
@@ -231,9 +235,16 @@ def display_market_analysis(comparison):
                 
                 st.divider()
     
+    # Meilleure offre détaillée
+    if best_offer_data:
+        st.markdown("#### 🏆 Meilleure offre détaillée")
+        st.info("Voici les détails de la meilleure offre trouvée, au format standardisé.")
+        with st.expander("Voir les détails (JSON)", expanded=False):
+            st.json(best_offer_data)
+
     # Réponse complète
     with st.expander("📄 Réponse complète de l'IA"):
-        st.json(result)
+        st.json(full_result)
 
 
 def display_competitor_comparison(comparison):

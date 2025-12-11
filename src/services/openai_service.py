@@ -433,6 +433,8 @@ Réponds uniquement avec le JSON, sans texte additionnel."""
         """Construit le prompt pour la comparaison de marché."""
         
         contract_json = json.dumps(contract_data, indent=2, ensure_ascii=False)
+        schema = self._get_contract_schema(contract_type)
+        schema_json = json.dumps(schema, indent=2, ensure_ascii=False)
         
         if contract_type == "telephone":
             return f"""Analyse ce contrat de téléphonie mobile et compare-le avec les offres actuelles du marché français en décembre 2025.
@@ -440,28 +442,34 @@ Réponds uniquement avec le JSON, sans texte additionnel."""
 Contrat actuel:
 {contract_json}
 
+SCHÉMA DE DONNÉES POUR L'OFFRE (à respecter pour 'meilleure_offre'):
+{schema_json}
+
 Fournis une analyse au format JSON avec:
 {{
-    "tarif_actuel": prix mensuel actuel (nombre),
-    "estimation_marche": {{
-        "tarif_min": tarif minimum trouvable sur le marché pour des conditions similaires (nombre),
-        "tarif_moyen": tarif moyen du marché (nombre),
-        "tarif_max": tarif maximum (nombre)
+    "analyse": {{
+        "tarif_actuel": prix mensuel actuel (nombre),
+        "estimation_marche": {{
+            "tarif_min": tarif minimum trouvable sur le marché pour des conditions similaires (nombre),
+            "tarif_moyen": tarif moyen du marché (nombre),
+            "tarif_max": tarif maximum (nombre)
+        }},
+        "economie_potentielle_mensuelle": économie mensuelle possible en euros (nombre, peut être négative),
+        "economie_potentielle_annuelle": économie annuelle possible en euros (nombre),
+        "offres_similaires": [
+            {{
+                "fournisseur": "nom",
+                "forfait": "nom du forfait",
+                "prix_mensuel": prix (nombre),
+                "avantages": ["liste des avantages"],
+                "inconvenients": ["liste des inconvénients"]
+            }}
+        ],
+        "recommandation": "recommendation claire (garder/changer)",
+        "justification": "explication détaillée de la recommandation",
+        "niveau_competitivite": "excellent/bon/moyen/faible"
     }},
-    "economie_potentielle_mensuelle": économie mensuelle possible en euros (nombre, peut être négative),
-    "economie_potentielle_annuelle": économie annuelle possible en euros (nombre),
-    "offres_similaires": [
-        {{
-            "fournisseur": "nom",
-            "forfait": "nom du forfait",
-            "prix_mensuel": prix (nombre),
-            "avantages": ["liste des avantages"],
-            "inconvenients": ["liste des inconvénients"]
-        }}
-    ],
-    "recommandation": "recommendation claire (garder/changer)",
-    "justification": "explication détaillée de la recommandation",
-    "niveau_competitivite": "excellent/bon/moyen/faible"
+    "meilleure_offre": (Remplis ce champ avec les données de la meilleure offre trouvée sur le marché, en respectant EXACTEMENT le schéma fourni ci-dessus. Remplis le maximum de champs possibles avec les données de l'offre, mets null si inconnu.)
 }}
 
 Base-toi sur les offres réelles des opérateurs français (Orange, SFR, Bouygues, Free, Sosh, Red, B&You, etc.)."""
@@ -472,30 +480,36 @@ Base-toi sur les offres réelles des opérateurs français (Orange, SFR, Bouygue
 Contrat actuel:
 {contract_json}
 
+SCHÉMA DE DONNÉES POUR L'OFFRE (à respecter pour 'meilleure_offre'):
+{schema_json}
+
 Fournis une analyse au format JSON avec:
 {{
-    "prime_actuelle_annuelle": prime annuelle actuelle (nombre),
-    "estimation_marche": {{
-        "prime_min": prime minimum trouvable pour des conditions similaires (nombre),
-        "prime_moyenne": prime moyenne du marché (nombre),
-        "prime_max": prime maximum (nombre)
+    "analyse": {{
+        "prime_actuelle_annuelle": prime annuelle actuelle (nombre),
+        "estimation_marche": {{
+            "prime_min": prime minimum trouvable pour des conditions similaires (nombre),
+            "prime_moyenne": prime moyenne du marché (nombre),
+            "prime_max": prime maximum (nombre)
+        }},
+        "economie_potentielle_annuelle": économie annuelle possible en euros (nombre, peut être négative),
+        "ratio_qualite_prix": évaluation du rapport qualité/prix (nombre entre 0 et 10),
+        "offres_similaires": [
+            {{
+                "assureur": "nom",
+                "prime_annuelle": prix (nombre),
+                "franchise": montant franchise (nombre),
+                "garanties_principales": ["liste des garanties"],
+                "avantages": ["liste des avantages"],
+                "inconvenients": ["liste des inconvénients"]
+            }}
+        ],
+        "points_attention": ["points importants à vérifier"],
+        "recommandation": "recommendation claire (garder/changer)",
+        "justification": "explication détaillée",
+        "niveau_competitivite": "excellent/bon/moyen/faible"
     }},
-    "economie_potentielle_annuelle": économie annuelle possible en euros (nombre, peut être négative),
-    "ratio_qualite_prix": évaluation du rapport qualité/prix (nombre entre 0 et 10),
-    "offres_similaires": [
-        {{
-            "assureur": "nom",
-            "prime_annuelle": prix (nombre),
-            "franchise": montant franchise (nombre),
-            "garanties_principales": ["liste des garanties"],
-            "avantages": ["liste des avantages"],
-            "inconvenients": ["liste des inconvénients"]
-        }}
-    ],
-    "points_attention": ["points importants à vérifier"],
-    "recommandation": "recommendation claire (garder/changer)",
-    "justification": "explication détaillée",
-    "niveau_competitivite": "excellent/bon/moyen/faible"
+    "meilleure_offre": (Remplis ce champ avec les données de la meilleure offre trouvée sur le marché, en respectant EXACTEMENT le schéma fourni ci-dessus. Remplis le maximum de champs possibles avec les données de l'offre, mets null si inconnu.)
 }}
 
 Base-toi sur les offres réelles des assureurs français (Allianz, AXA, Generali, MAIF, MACIF, Groupama, etc.)."""
@@ -506,35 +520,41 @@ Base-toi sur les offres réelles des assureurs français (Allianz, AXA, Generali
 Contrat actuel:
 {contract_json}
 
+SCHÉMA DE DONNÉES POUR L'OFFRE (à respecter pour 'meilleure_offre'):
+{schema_json}
+
 Fournis une analyse au format JSON avec:
 {{
-    "cout_annuel_actuel": coût annuel estimé actuel (nombre),
-    "estimation_marche": {{
-        "cout_min": coût annuel minimum trouvable pour une consommation similaire (nombre),
-        "cout_moyen": coût annuel moyen du marché (nombre),
-        "cout_max": coût annuel maximum (nombre)
+    "analyse": {{
+        "cout_annuel_actuel": coût annuel estimé actuel (nombre),
+        "estimation_marche": {{
+            "cout_min": coût annuel minimum trouvable pour une consommation similaire (nombre),
+            "cout_moyen": coût annuel moyen du marché (nombre),
+            "cout_max": coût annuel maximum (nombre)
+        }},
+        "economie_potentielle_annuelle": économie annuelle possible en euros (nombre, peut être négative),
+        "prix_kwh_marche": {{
+            "min": prix du kWh minimum sur le marché (nombre),
+            "moyen": prix du kWh moyen (nombre),
+            "max": prix du kWh maximum (nombre)
+        }},
+        "offres_similaires": [
+            {{
+                "fournisseur": "nom",
+                "offre": "nom de l'offre",
+                "abonnement_mensuel": prix abonnement (nombre),
+                "prix_kwh": prix du kWh (nombre),
+                "cout_annuel_estime": coût annuel estimé (nombre),
+                "avantages": ["liste des avantages"],
+                "inconvenients": ["liste des inconvénients"]
+            }}
+        ],
+        "points_attention": ["points importants à vérifier"],
+        "recommandation": "recommendation claire (garder/changer)",
+        "justification": "explication détaillée",
+        "niveau_competitivite": "excellent/bon/moyen/faible"
     }},
-    "economie_potentielle_annuelle": économie annuelle possible en euros (nombre, peut être négative),
-    "prix_kwh_marche": {{
-        "min": prix du kWh minimum sur le marché (nombre),
-        "moyen": prix du kWh moyen (nombre),
-        "max": prix du kWh maximum (nombre)
-    }},
-    "offres_similaires": [
-        {{
-            "fournisseur": "nom",
-            "offre": "nom de l'offre",
-            "abonnement_mensuel": prix abonnement (nombre),
-            "prix_kwh": prix du kWh (nombre),
-            "cout_annuel_estime": coût annuel estimé (nombre),
-            "avantages": ["liste des avantages"],
-            "inconvenients": ["liste des inconvénients"]
-        }}
-    ],
-    "points_attention": ["points importants à vérifier"],
-    "recommandation": "recommendation claire (garder/changer)",
-    "justification": "explication détaillée",
-    "niveau_competitivite": "excellent/bon/moyen/faible"
+    "meilleure_offre": (Remplis ce champ avec les données de la meilleure offre trouvée sur le marché, en respectant EXACTEMENT le schéma fourni ci-dessus. Remplis le maximum de champs possibles avec les données de l'offre, mets null si inconnu.)
 }}
 
 Base-toi sur les offres réelles des fournisseurs français (EDF, Engie, TotalEnergies, Ekwateur, OHM Énergie, etc.)."""
@@ -545,35 +565,41 @@ Base-toi sur les offres réelles des fournisseurs français (EDF, Engie, TotalEn
 Contrat actuel:
 {contract_json}
 
+SCHÉMA DE DONNÉES POUR L'OFFRE (à respecter pour 'meilleure_offre'):
+{schema_json}
+
 Fournis une analyse au format JSON avec:
 {{
-    "cout_annuel_actuel": coût annuel estimé actuel (nombre),
-    "estimation_marche": {{
-        "cout_min": coût annuel minimum trouvable pour une consommation similaire (nombre),
-        "cout_moyen": coût annuel moyen du marché (nombre),
-        "cout_max": coût annuel maximum (nombre)
+    "analyse": {{
+        "cout_annuel_actuel": coût annuel estimé actuel (nombre),
+        "estimation_marche": {{
+            "cout_min": coût annuel minimum trouvable pour une consommation similaire (nombre),
+            "cout_moyen": coût annuel moyen du marché (nombre),
+            "cout_max": coût annuel maximum (nombre)
+        }},
+        "economie_potentielle_annuelle": économie annuelle possible en euros (nombre, peut être négative),
+        "prix_kwh_marche": {{
+            "min": prix du kWh minimum sur le marché (nombre),
+            "moyen": prix du kWh moyen (nombre),
+            "max": prix du kWh maximum (nombre)
+        }},
+        "offres_similaires": [
+            {{
+                "fournisseur": "nom",
+                "offre": "nom de l'offre",
+                "abonnement_mensuel": prix abonnement (nombre),
+                "prix_kwh": prix du kWh (nombre),
+                "cout_annuel_estime": coût annuel estimé (nombre),
+                "avantages": ["liste des avantages"],
+                "inconvenients": ["liste des inconvénients"]
+            }}
+        ],
+        "points_attention": ["points importants à vérifier"],
+        "recommandation": "recommendation claire (garder/changer)",
+        "justification": "explication détaillée",
+        "niveau_competitivite": "excellent/bon/moyen/faible"
     }},
-    "economie_potentielle_annuelle": économie annuelle possible en euros (nombre, peut être négative),
-    "prix_kwh_marche": {{
-        "min": prix du kWh minimum sur le marché (nombre),
-        "moyen": prix du kWh moyen (nombre),
-        "max": prix du kWh maximum (nombre)
-    }},
-    "offres_similaires": [
-        {{
-            "fournisseur": "nom",
-            "offre": "nom de l'offre",
-            "abonnement_mensuel": prix abonnement (nombre),
-            "prix_kwh": prix du kWh (nombre),
-            "cout_annuel_estime": coût annuel estimé (nombre),
-            "avantages": ["liste des avantages"],
-            "inconvenients": ["liste des inconvénients"]
-        }}
-    ],
-    "points_attention": ["points importants à vérifier"],
-    "recommandation": "recommendation claire (garder/changer)",
-    "justification": "explication détaillée",
-    "niveau_competitivite": "excellent/bon/moyen/faible"
+    "meilleure_offre": (Remplis ce champ avec les données de la meilleure offre trouvée sur le marché, en respectant EXACTEMENT le schéma fourni ci-dessus. Remplis le maximum de champs possibles avec les données de l'offre, mets null si inconnu.)
 }}
 
 Base-toi sur les offres réelles des fournisseurs français (Engie, TotalEnergies, EDF, Eni, Ekwateur, etc.)."""
