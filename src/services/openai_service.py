@@ -61,10 +61,13 @@ class OpenAIService:
             result = response.choices[0].message.content
 
             # Nettoyer le JSON si nécessaire
-            if "```json" in result:
+            if result and "```json" in result:
                 result = result.split("```json")[1].split("```")[0].strip()
-            elif "```" in result:
+            elif result and "```" in result:
                 result = result.split("```")[1].split("```")[0].strip()
+
+            if not result:
+                raise ValueError("Réponse vide de OpenAI")
 
             extracted_data = json.loads(result)
 

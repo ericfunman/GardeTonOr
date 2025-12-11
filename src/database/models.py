@@ -11,8 +11,9 @@ from sqlalchemy import (
     JSON,
 )
 from sqlalchemy.orm import declarative_base, relationship
+from sqlalchemy.orm import DeclarativeMeta
 
-Base = declarative_base()  # type: ignore
+Base: DeclarativeMeta = declarative_base()
 
 
 class Contract(Base):
