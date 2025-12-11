@@ -101,7 +101,7 @@ Retourne UNIQUEMENT le JSON, sans texte supplémentaire."""
             try:
                 self.client.files.delete(file_id)
             except Exception:
-                pass  # Ignore les erreurs de suppression
+                pass  # nosec # Ignore les erreurs de suppression
 
             return {"data": extracted_data, "file_id": file_id, "raw_response": result}
 
