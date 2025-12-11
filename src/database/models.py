@@ -12,7 +12,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import declarative_base, relationship
 
-Base = declarative_base()
+Base = declarative_base()  # type: ignore
 
 
 class Contract(Base):
