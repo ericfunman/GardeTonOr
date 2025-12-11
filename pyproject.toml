@@ -13,6 +13,7 @@ extend-exclude = '''
   | \.venv
   | build
   | dist
+  | src/services/openai_service_v2.py
 )/
 '''
 
