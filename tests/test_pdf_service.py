@@ -1,7 +1,7 @@
 """Tests pour le service PDF."""
 import pytest
 import io
-from PyPDF2 import PdfWriter
+from pypdf import PdfWriter
 
 from src.services.pdf_service import PDFService
 

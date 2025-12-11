@@ -1,5 +1,5 @@
 """Service métier pour la gestion des contrats."""
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import List, Dict, Any, Optional, Tuple
 from sqlalchemy.orm import Session
 
@@ -277,7 +277,7 @@ class ContractService:
             if hasattr(contract, key):
                 setattr(contract, key, value)
 
-        contract.updated_at = datetime.utcnow()
+        contract.updated_at = datetime.now(timezone.utc)
         self.db.commit()
         self.db.refresh(contract)
 
