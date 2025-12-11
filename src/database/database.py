@@ -27,7 +27,7 @@ def init_database() -> None:
 def get_db() -> Generator[Session, None, None]:
     """
     Context manager pour obtenir une session de base de données.
-    
+
     Usage:
         with get_db() as db:
             contracts = db.query(Contract).all()

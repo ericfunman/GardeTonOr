@@ -10,7 +10,8 @@ st.set_page_config(**STREAMLIT_CONFIG)
 init_database()
 
 # Style CSS personnalisé
-st.markdown("""
+st.markdown(
+    """
     <style>
     .main-header {
         font-size: 3rem;
@@ -44,13 +45,15 @@ st.markdown("""
         border-left: 4px solid #17a2b8;
     }
     </style>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
 
 # Header principal
 st.markdown('<div class="main-header">💰 GardeTonOr</div>', unsafe_allow_html=True)
 st.markdown(
     '<p style="text-align: center; font-size: 1.2rem; color: #666;">Optimisez vos contrats avec l\'intelligence artificielle</p>',
-    unsafe_allow_html=True
+    unsafe_allow_html=True,
 )
 
 st.divider()
@@ -60,21 +63,25 @@ st.sidebar.title("📋 Navigation")
 page = st.sidebar.radio(
     "Aller à",
     ["🏠 Dashboard", "➕ Ajouter un contrat", "⚖️ Comparer", "📊 Historique"],
-    label_visibility="collapsed"
+    label_visibility="collapsed",
 )
 
 # Affichage des pages
 if page == "🏠 Dashboard":
     from src.pages import dashboard
+
     dashboard.show()
 elif page == "➕ Ajouter un contrat":
     from src.pages import add_contract
+
     add_contract.show()
 elif page == "⚖️ Comparer":
     from src.pages import compare
+
     compare.show()
 elif page == "📊 Historique":
     from src.pages import history
+
     history.show()
 
 # Footer

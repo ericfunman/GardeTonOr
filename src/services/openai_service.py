@@ -19,7 +19,7 @@ class OpenAIService:
         self.api_key = api_key or OPENAI_API_KEY
         if not self.api_key:
             raise ValueError("Clé API OpenAI non configurée")
-        
+
         self.client = OpenAI(api_key=self.api_key)
         self.model = OPENAI_MODEL
 
@@ -41,7 +41,7 @@ class OpenAIService:
         # Obtenir le schéma générique
         schema = self._get_contract_schema(contract_type)
         prompt = self._build_extraction_prompt(contract_type, pdf_text, schema)
-        
+
         try:
             response = self.client.chat.completions.create(
                 model=self.model,
@@ -50,35 +50,37 @@ class OpenAIService:
                         "role": "system",
                         "content": "Tu es un expert en analyse de contrats. "
                         "Tu extrais les données de manière précise et structurée en JSON. "
-                        "Respecte EXACTEMENT le schéma fourni."
+                        "Respecte EXACTEMENT le schéma fourni.",
                     },
-                    {"role": "user", "content": prompt}
+                    {"role": "user", "content": prompt},
                 ],
                 temperature=0.1,  # Basse température pour plus de précision
-                response_format={"type": "json_object"}
+                response_format={"type": "json_object"},
             )
-            
+
             result = response.choices[0].message.content
-            
+
             # Nettoyer le JSON si nécessaire
             if "```json" in result:
                 result = result.split("```json")[1].split("```")[0].strip()
             elif "```" in result:
                 result = result.split("```")[1].split("```")[0].strip()
-            
+
             extracted_data = json.loads(result)
-            
+
             return {
                 "data": extracted_data,
                 "prompt": prompt,
                 "raw_response": result,
-                "schema": schema
+                "schema": schema,
             }
-        
+
         except Exception as e:
             raise Exception(f"Erreur lors de l'extraction des données: {str(e)}")
 
-    def compare_with_market(self, contract_data: Dict[str, Any], contract_type: str) -> Dict[str, Any]:
+    def compare_with_market(
+        self, contract_data: Dict[str, Any], contract_type: str
+    ) -> Dict[str, Any]:
         """
         Compare un contrat avec les offres actuelles du marché.
 
@@ -93,7 +95,7 @@ class OpenAIService:
             Exception: Si la comparaison échoue
         """
         prompt = self._build_market_comparison_prompt(contract_type, contract_data)
-        
+
         try:
             response = self.client.chat.completions.create(
                 model=self.model,
@@ -102,31 +104,24 @@ class OpenAIService:
                         "role": "system",
                         "content": "Tu es un expert en comparaison de contrats et d'offres commerciales. "
                         "Tu connais le marché français et ses tarifs actuels. "
-                        "Fournis une analyse objective et des recommandations concrètes au format JSON."
+                        "Fournis une analyse objective et des recommandations concrètes au format JSON.",
                     },
-                    {"role": "user", "content": prompt}
+                    {"role": "user", "content": prompt},
                 ],
                 temperature=0.3,
-                response_format={"type": "json_object"}
+                response_format={"type": "json_object"},
             )
-            
+
             result = response.choices[0].message.content
             comparison_result = json.loads(result)
-            
-            return {
-                "analysis": comparison_result,
-                "prompt": prompt,
-                "raw_response": result
-            }
-        
+
+            return {"analysis": comparison_result, "prompt": prompt, "raw_response": result}
+
         except Exception as e:
             raise Exception(f"Erreur lors de la comparaison de marché: {str(e)}")
 
     def compare_with_competitor(
-        self,
-        current_contract: Dict[str, Any],
-        competitor_data: Dict[str, Any],
-        contract_type: str
+        self, current_contract: Dict[str, Any], competitor_data: Dict[str, Any], contract_type: str
     ) -> Dict[str, Any]:
         """
         Compare un contrat actuel avec une offre concurrente.
@@ -143,11 +138,9 @@ class OpenAIService:
             Exception: Si la comparaison échoue
         """
         prompt = self._build_competitor_comparison_prompt(
-            contract_type,
-            current_contract,
-            competitor_data
+            contract_type, current_contract, competitor_data
         )
-        
+
         try:
             response = self.client.chat.completions.create(
                 model=self.model,
@@ -156,29 +149,28 @@ class OpenAIService:
                         "role": "system",
                         "content": "Tu es un expert en comparaison de contrats. "
                         "Analyse objectivement les deux offres et fournis une recommandation "
-                        "claire au format JSON avec les avantages et inconvénients de chaque offre."
+                        "claire au format JSON avec les avantages et inconvénients de chaque offre.",
                     },
-                    {"role": "user", "content": prompt}
+                    {"role": "user", "content": prompt},
                 ],
                 temperature=0.2,
-                response_format={"type": "json_object"}
+                response_format={"type": "json_object"},
             )
-            
+
             result = response.choices[0].message.content
             comparison_result = json.loads(result)
-            
-            return {
-                "analysis": comparison_result,
-                "prompt": prompt,
-                "raw_response": result
-            }
-        
+
+            return {"analysis": comparison_result, "prompt": prompt, "raw_response": result}
+
         except Exception as e:
             raise Exception(f"Erreur lors de la comparaison avec concurrent: {str(e)}")
 
     def _get_contract_schema(self, contract_type: str) -> Dict[str, Any]:
         """Retourne le schéma JSON générique normalisé selon le type de contrat."""
-        
+        valid_types = ["telephone", "assurance_pno", "electricite", "gaz"]
+        if contract_type not in valid_types:
+            raise ValueError(f"Type de contrat non supporté: {contract_type}")
+
         # Schéma de base commun à tous les contrats
         base_schema = {
             "type_contrat": contract_type,
@@ -189,95 +181,82 @@ class OpenAIService:
                 "email": "",
                 "telephone": "",
                 "date_naissance": "",
-                "reference_client": ""
+                "reference_client": "",
             },
             "dates": {
                 "signature_contrat": "",
                 "date_debut": "",
                 "date_anniversaire": "",
-                "retractation_limite": ""
+                "retractation_limite": "",
             },
-            "paiements": {
-                "mode": "",
-                "date_prelevement": ""
-            },
+            "paiements": {"mode": "", "date_prelevement": ""},
             "service_client": {
                 "tel_souscription": "",
                 "tel_service_client": "",
-                "contact_courrier": ""
-            }
+                "contact_courrier": "",
+            },
         }
-        
+
         if contract_type == "electricite":
-            base_schema.update({
-                "adresses": {
-                    "site_de_consommation": "",
-                    "adresse_facturation": ""
-                },
-                "electricite": {
-                    "pdl": "",
-                    "puissance_souscrite_kva": None,
-                    "option_tarifaire": "",
-                    "matricule_compteur": "",
-                    "date_debut_previsionnelle": "",
-                    "tarifs": {
-                        "abonnement_mensuel_ttc": None,
-                        "prix_kwh_ht": None,
-                        "prix_kwh_ttc": None
+            base_schema.update(
+                {
+                    "adresses": {"site_de_consommation": "", "adresse_facturation": ""},
+                    "electricite": {
+                        "pdl": "",
+                        "puissance_souscrite_kva": None,
+                        "option_tarifaire": "",
+                        "matricule_compteur": "",
+                        "date_debut_previsionnelle": "",
+                        "tarifs": {
+                            "abonnement_mensuel_ttc": None,
+                            "prix_kwh_ht": None,
+                            "prix_kwh_ttc": None,
+                        },
+                        "promotion": {"remise_kwh_ht_percent": None, "duree_mois": None},
+                        "consommation_estimee_annuelle_kwh": None,
+                        "budget_annuel_estime_ttc": None,
                     },
-                    "promotion": {
-                        "remise_kwh_ht_percent": None,
-                        "duree_mois": None
+                    "paiements": {
+                        "mensualite_electricite_ttc": None,
+                        "mode": "",
+                        "date_prelevement": "",
                     },
-                    "consommation_estimee_annuelle_kwh": None,
-                    "budget_annuel_estime_ttc": None
-                },
-                "paiements": {
-                    "mensualite_electricite_ttc": None,
-                    "mode": "",
-                    "date_prelevement": ""
                 }
-            })
-        
+            )
+
         elif contract_type == "gaz":
-            base_schema.update({
-                "adresses": {
-                    "site_de_consommation": "",
-                    "adresse_facturation": ""
-                },
-                "gaz": {
-                    "pce": "",
-                    "option_tarifaire": "",
-                    "zone_tarifaire": None,
-                    "matricule_compteur": "",
-                    "date_debut_previsionnelle": "",
-                    "tarifs": {
-                        "abonnement_mensuel_ttc": None,
-                        "prix_kwh_ht": None,
-                        "prix_kwh_ttc": None
+            base_schema.update(
+                {
+                    "adresses": {"site_de_consommation": "", "adresse_facturation": ""},
+                    "gaz": {
+                        "pce": "",
+                        "option_tarifaire": "",
+                        "zone_tarifaire": None,
+                        "matricule_compteur": "",
+                        "date_debut_previsionnelle": "",
+                        "tarifs": {
+                            "abonnement_mensuel_ttc": None,
+                            "prix_kwh_ht": None,
+                            "prix_kwh_ttc": None,
+                        },
+                        "promotion": {"remise_kwh_ht_percent": None, "duree_mois": None},
+                        "consommation_estimee_annuelle_kwh": None,
+                        "budget_annuel_estime_ttc": None,
                     },
-                    "promotion": {
-                        "remise_kwh_ht_percent": None,
-                        "duree_mois": None
-                    },
-                    "consommation_estimee_annuelle_kwh": None,
-                    "budget_annuel_estime_ttc": None
-                },
-                "paiements": {
-                    "mensualite_gaz_ttc": None,
-                    "mode": "",
-                    "date_prelevement": ""
+                    "paiements": {"mensualite_gaz_ttc": None, "mode": "", "date_prelevement": ""},
                 }
-            })
-        
+            )
+
         return base_schema
 
-    def _build_extraction_prompt(self, contract_type: str, pdf_text: str, schema: Dict[str, Any] = None) -> str:
+    def _build_extraction_prompt(
+        self, contract_type: str, pdf_text: str, schema: Dict[str, Any] = None
+    ) -> str:
         """Construit le prompt pour l'extraction de données avec schéma générique."""
-        
+
         if schema is None:
             schema = self._get_contract_schema(contract_type)
-        
+
         base_instructions = f"""Analyse ce contrat de type '{contract_type}' et extrais TOUTES les informations disponibles.
 
 SCHÉMA JSON ATTENDU (respecte-le EXACTEMENT) :
@@ -296,12 +275,12 @@ CONTENU DU CONTRAT :
 {pdf_text}
 
 JSON de réponse :"""
-        
+
         return base_instructions
 
     def _build_extraction_prompt_legacy(self, contract_type: str, pdf_text: str) -> str:
         """Version legacy du prompt (pour compatibilité)."""
-        
+
         if contract_type == "telephone":
             return f"""Analyse ce contrat de téléphonie mobile et extrais les informations suivantes au format JSON:
 
@@ -426,16 +405,14 @@ Réponds uniquement avec le JSON, sans texte additionnel."""
             raise ValueError(f"Type de contrat non supporté: {contract_type}")
 
     def _build_market_comparison_prompt(
-        self,
-        contract_type: str,
-        contract_data: Dict[str, Any]
+        self, contract_type: str, contract_data: Dict[str, Any]
     ) -> str:
         """Construit le prompt pour la comparaison de marché."""
-        
+
         contract_json = json.dumps(contract_data, indent=2, ensure_ascii=False)
         schema = self._get_contract_schema(contract_type)
         schema_json = json.dumps(schema, indent=2, ensure_ascii=False)
-        
+
         if contract_type == "telephone":
             return f"""Analyse ce contrat de téléphonie mobile et compare-le avec les offres actuelles du marché français en décembre 2025.
 
@@ -608,16 +585,13 @@ Base-toi sur les offres réelles des fournisseurs français (Engie, TotalEnergie
             raise ValueError(f"Type de contrat non supporté: {contract_type}")
 
     def _build_competitor_comparison_prompt(
-        self,
-        contract_type: str,
-        current_contract: Dict[str, Any],
-        competitor_data: Dict[str, Any]
+        self, contract_type: str, current_contract: Dict[str, Any], competitor_data: Dict[str, Any]
     ) -> str:
         """Construit le prompt pour la comparaison avec un concurrent."""
-        
+
         current_json = json.dumps(current_contract, indent=2, ensure_ascii=False)
         competitor_json = json.dumps(competitor_data, indent=2, ensure_ascii=False)
-        
+
         return f"""Compare ces deux contrats de type {contract_type} et fournis une analyse détaillée.
 
 CONTRAT ACTUEL:

@@ -26,10 +26,7 @@ class ContractService:
         self.pdf_service = pdf_service
 
     def extract_and_create_contract(
-        self,
-        pdf_bytes: bytes,
-        filename: str,
-        contract_type: str
+        self, pdf_bytes: bytes, filename: str, contract_type: str
     ) -> Tuple[Dict[str, Any], str]:
         """
         Extrait les données d'un PDF et prépare les données pour création de contrat.
@@ -62,7 +59,7 @@ class ContractService:
             gpt_prompt=extraction_result["prompt"],
             gpt_response=extraction_result["raw_response"],
             extracted_data=extraction_result["data"],
-            success=1
+            success=1,
         )
         self.db.add(extraction_log)
         self.db.commit()
@@ -78,7 +75,7 @@ class ContractService:
         contract_data: Dict[str, Any],
         pdf_bytes: bytes,
         filename: str,
-        end_date: Optional[datetime] = None
+        end_date: Optional[datetime] = None,
     ) -> Contract:
         """
         Crée un nouveau contrat dans la base de données.
@@ -105,7 +102,7 @@ class ContractService:
             contract_data=contract_data,
             pdf_content=pdf_bytes,
             original_filename=filename,
-            validated=1  # Validé après confirmation utilisateur
+            validated=1,  # Validé après confirmation utilisateur
         )
 
         self.db.add(contract)
@@ -130,11 +127,16 @@ class ContractService:
             Liste des contrats nécessitant attention
         """
         threshold_date = datetime.now() + timedelta(days=NOTIFICATION_DAYS_BEFORE)
-        
-        return self.db.query(Contract).filter(
-            Contract.anniversary_date <= threshold_date,
-            Contract.anniversary_date >= datetime.now()
-        ).order_by(Contract.anniversary_date).all()
+
+        return (
+            self.db.query(Contract)
+            .filter(
+                Contract.anniversary_date <= threshold_date,
+                Contract.anniversary_date >= datetime.now(),
+            )
+            .order_by(Contract.anniversary_date)
+            .all()
+        )
 
     def compare_with_market(self, contract_id: int) -> Comparison:
         """
@@ -155,8 +157,7 @@ class ContractService:
 
         # Effectuer la comparaison via OpenAI
         comparison_result = self.openai_service.compare_with_market(
-            contract.contract_data,
-            contract.contract_type
+            contract.contract_data, contract.contract_type
         )
 
         # Créer l'objet Comparison
@@ -166,7 +167,7 @@ class ContractService:
             gpt_prompt=comparison_result["prompt"],
             gpt_response=comparison_result["raw_response"],
             comparison_result=comparison_result["analysis"],
-            analysis_summary=comparison_result["analysis"].get("recommandation", "")
+            analysis_summary=comparison_result["analysis"].get("recommandation", ""),
         )
 
         self.db.add(comparison)
@@ -176,10 +177,7 @@ class ContractService:
         return comparison
 
     def compare_with_competitor(
-        self,
-        contract_id: int,
-        competitor_pdf_bytes: bytes,
-        competitor_filename: str
+        self, contract_id: int, competitor_pdf_bytes: bytes, competitor_filename: str
     ) -> Comparison:
         """
         Compare un contrat avec un devis concurrent.
@@ -202,15 +200,12 @@ class ContractService:
         # Extraire les données du PDF concurrent
         competitor_text = self.pdf_service.extract_text_from_pdf(competitor_pdf_bytes)
         competitor_extraction = self.openai_service.extract_contract_data(
-            competitor_text,
-            contract.contract_type
+            competitor_text, contract.contract_type
         )
 
         # Comparer les deux contrats
         comparison_result = self.openai_service.compare_with_competitor(
-            contract.contract_data,
-            competitor_extraction["data"],
-            contract.contract_type
+            contract.contract_data, competitor_extraction["data"], contract.contract_type
         )
 
         # Créer l'objet Comparison
@@ -223,7 +218,7 @@ class ContractService:
             gpt_prompt=comparison_result["prompt"],
             gpt_response=comparison_result["raw_response"],
             comparison_result=comparison_result["analysis"],
-            analysis_summary=comparison_result["analysis"].get("recommandation", "")
+            analysis_summary=comparison_result["analysis"].get("recommandation", ""),
         )
 
         self.db.add(comparison)
@@ -234,15 +229,16 @@ class ContractService:
 
     def get_contract_comparisons(self, contract_id: int) -> List[Comparison]:
         """Récupère toutes les comparaisons d'un contrat."""
-        return self.db.query(Comparison).filter(
-            Comparison.contract_id == contract_id
-        ).order_by(Comparison.created_at.desc()).all()
+        return (
+            self.db.query(Comparison)
+            .filter(Comparison.contract_id == contract_id)
+            .order_by(Comparison.created_at.desc())
+            .all()
+        )
 
     def get_all_comparisons(self) -> List[Comparison]:
         """Récupère toutes les comparaisons."""
-        return self.db.query(Comparison).order_by(
-            Comparison.created_at.desc()
-        ).all()
+        return self.db.query(Comparison).order_by(Comparison.created_at.desc()).all()
 
     def delete_contract(self, contract_id: int) -> bool:
         """
@@ -262,11 +258,7 @@ class ContractService:
         self.db.commit()
         return True
 
-    def update_contract(
-        self,
-        contract_id: int,
-        updates: Dict[str, Any]
-    ) -> Optional[Contract]:
+    def update_contract(self, contract_id: int, updates: Dict[str, Any]) -> Optional[Contract]:
         """
         Met à jour un contrat.
 

@@ -1,10 +1,10 @@
 """Tests pour le service de gestion des contrats."""
 import pytest
-from unittest.mock import Mock, patch
+from unittest.mock import Mock
 from datetime import datetime, timedelta
 
 from src.services.contract_service import ContractService
-from src.database.models import Contract, Comparison
+from src.database.models import Contract
 
 
 class TestContractService:
@@ -14,10 +14,10 @@ class TestContractService:
         """Test de récupération de tous les contrats."""
         mock_openai = Mock()
         mock_pdf = Mock()
-        
+
         service = ContractService(db_session, mock_openai, mock_pdf)
         contracts = service.get_all_contracts()
-        
+
         assert len(contracts) == 2
         assert any(c.provider == "Free Mobile" for c in contracts)
         assert any(c.provider == "AXA" for c in contracts)
@@ -26,10 +26,10 @@ class TestContractService:
         """Test de récupération d'un contrat par ID."""
         mock_openai = Mock()
         mock_pdf = Mock()
-        
+
         service = ContractService(db_session, mock_openai, mock_pdf)
         contract = service.get_contract_by_id(sample_contract_telephone.id)
-        
+
         assert contract is not None
         assert contract.provider == "Free Mobile"
 
@@ -37,10 +37,10 @@ class TestContractService:
         """Test de récupération avec un ID invalide."""
         mock_openai = Mock()
         mock_pdf = Mock()
-        
+
         service = ContractService(db_session, mock_openai, mock_pdf)
         contract = service.get_contract_by_id(9999)
-        
+
         assert contract is None
 
     def test_get_contracts_needing_attention(self, db_session):
@@ -53,17 +53,17 @@ class TestContractService:
             start_date=datetime.now(),
             anniversary_date=near_date,
             contract_data={"test": "data"},
-            validated=1
+            validated=1,
         )
         db_session.add(contract)
         db_session.commit()
-        
+
         mock_openai = Mock()
         mock_pdf = Mock()
-        
+
         service = ContractService(db_session, mock_openai, mock_pdf)
         contracts = service.get_contracts_needing_attention()
-        
+
         assert len(contracts) >= 1
         assert any(c.provider == "Test Provider" for c in contracts)
 
@@ -71,14 +71,11 @@ class TestContractService:
         """Test de création d'un contrat."""
         mock_openai = Mock()
         mock_pdf = Mock()
-        
+
         service = ContractService(db_session, mock_openai, mock_pdf)
-        
-        contract_data = {
-            "fournisseur": "Orange",
-            "prix_mensuel": 25.99
-        }
-        
+
+        contract_data = {"fournisseur": "Orange", "prix_mensuel": 25.99}
+
         contract = service.create_contract(
             contract_type="telephone",
             provider="Orange",
@@ -86,35 +83,29 @@ class TestContractService:
             anniversary_date=datetime(2025, 1, 1),
             contract_data=contract_data,
             pdf_bytes=b"fake pdf content",
-            filename="orange.pdf"
+            filename="orange.pdf",
         )
-        
+
         assert contract.id is not None
         assert contract.provider == "Orange"
         assert contract.validated == 1
         assert contract.contract_data["prix_mensuel"] == 25.99
 
-    def test_extract_and_create_contract(
-        self,
-        db_session,
-        mock_openai_response_extraction
-    ):
+    def test_extract_and_create_contract(self, db_session, mock_openai_response_extraction):
         """Test d'extraction et préparation de création de contrat."""
         mock_openai = Mock()
         mock_openai.extract_contract_data.return_value = mock_openai_response_extraction
-        
+
         mock_pdf = Mock()
         mock_pdf.validate_pdf.return_value = True
         mock_pdf.extract_text_from_pdf.return_value = "test pdf text"
-        
+
         service = ContractService(db_session, mock_openai, mock_pdf)
-        
+
         extracted_data, pdf_text = service.extract_and_create_contract(
-            pdf_bytes=b"fake pdf",
-            filename="test.pdf",
-            contract_type="telephone"
+            pdf_bytes=b"fake pdf", filename="test.pdf", contract_type="telephone"
         )
-        
+
         assert extracted_data["fournisseur"] == "Free Mobile"
         assert pdf_text == "test pdf text"
         mock_pdf.validate_pdf.assert_called_once()
@@ -124,36 +115,31 @@ class TestContractService:
     def test_extract_and_create_contract_invalid_pdf(self, db_session):
         """Test d'extraction avec un PDF invalide."""
         mock_openai = Mock()
-        
+
         mock_pdf = Mock()
         mock_pdf.validate_pdf.return_value = False
-        
+
         service = ContractService(db_session, mock_openai, mock_pdf)
-        
+
         with pytest.raises(ValueError) as excinfo:
             service.extract_and_create_contract(
-                pdf_bytes=b"invalid",
-                filename="bad.pdf",
-                contract_type="telephone"
+                pdf_bytes=b"invalid", filename="bad.pdf", contract_type="telephone"
             )
-        
+
         assert "PDF valide" in str(excinfo.value)
 
     def test_compare_with_market(
-        self,
-        db_session,
-        sample_contract_telephone,
-        mock_openai_response_market
+        self, db_session, sample_contract_telephone, mock_openai_response_market
     ):
         """Test de comparaison avec le marché."""
         mock_openai = Mock()
         mock_openai.compare_with_market.return_value = mock_openai_response_market
-        
+
         mock_pdf = Mock()
-        
+
         service = ContractService(db_session, mock_openai, mock_pdf)
         comparison = service.compare_with_market(sample_contract_telephone.id)
-        
+
         assert comparison.id is not None
         assert comparison.contract_id == sample_contract_telephone.id
         assert comparison.comparison_type == "market_analysis"
@@ -164,12 +150,12 @@ class TestContractService:
         """Test de comparaison avec un contrat inexistant."""
         mock_openai = Mock()
         mock_pdf = Mock()
-        
+
         service = ContractService(db_session, mock_openai, mock_pdf)
-        
+
         with pytest.raises(ValueError) as excinfo:
             service.compare_with_market(9999)
-        
+
         assert "non trouvé" in str(excinfo.value)
 
     def test_compare_with_competitor(
@@ -177,24 +163,24 @@ class TestContractService:
         db_session,
         sample_contract_telephone,
         mock_openai_response_extraction,
-        mock_openai_response_competitor
+        mock_openai_response_competitor,
     ):
         """Test de comparaison avec un concurrent."""
         mock_openai = Mock()
         mock_openai.extract_contract_data.return_value = mock_openai_response_extraction
         mock_openai.compare_with_competitor.return_value = mock_openai_response_competitor
-        
+
         mock_pdf = Mock()
         mock_pdf.extract_text_from_pdf.return_value = "competitor text"
-        
+
         service = ContractService(db_session, mock_openai, mock_pdf)
-        
+
         comparison = service.compare_with_competitor(
             contract_id=sample_contract_telephone.id,
             competitor_pdf_bytes=b"competitor pdf",
-            competitor_filename="competitor.pdf"
+            competitor_filename="competitor.pdf",
         )
-        
+
         assert comparison.id is not None
         assert comparison.comparison_type == "competitor_quote"
         assert comparison.competitor_filename == "competitor.pdf"
@@ -204,24 +190,21 @@ class TestContractService:
         mock_openai.compare_with_competitor.assert_called_once()
 
     def test_get_contract_comparisons(
-        self,
-        db_session,
-        sample_contract_telephone,
-        mock_openai_response_market
+        self, db_session, sample_contract_telephone, mock_openai_response_market
     ):
         """Test de récupération des comparaisons d'un contrat."""
         mock_openai = Mock()
         mock_openai.compare_with_market.return_value = mock_openai_response_market
         mock_pdf = Mock()
-        
+
         service = ContractService(db_session, mock_openai, mock_pdf)
-        
+
         # Créer une comparaison
         service.compare_with_market(sample_contract_telephone.id)
-        
+
         # Récupérer les comparaisons
         comparisons = service.get_contract_comparisons(sample_contract_telephone.id)
-        
+
         assert len(comparisons) == 1
         assert comparisons[0].contract_id == sample_contract_telephone.id
 
@@ -229,14 +212,14 @@ class TestContractService:
         """Test de suppression d'un contrat."""
         mock_openai = Mock()
         mock_pdf = Mock()
-        
+
         service = ContractService(db_session, mock_openai, mock_pdf)
-        
+
         contract_id = sample_contract_telephone.id
         result = service.delete_contract(contract_id)
-        
+
         assert result is True
-        
+
         # Vérifier que le contrat n'existe plus
         deleted_contract = service.get_contract_by_id(contract_id)
         assert deleted_contract is None
@@ -245,26 +228,23 @@ class TestContractService:
         """Test de suppression d'un contrat inexistant."""
         mock_openai = Mock()
         mock_pdf = Mock()
-        
+
         service = ContractService(db_session, mock_openai, mock_pdf)
         result = service.delete_contract(9999)
-        
+
         assert result is False
 
     def test_update_contract(self, db_session, sample_contract_telephone):
         """Test de mise à jour d'un contrat."""
         mock_openai = Mock()
         mock_pdf = Mock()
-        
+
         service = ContractService(db_session, mock_openai, mock_pdf)
-        
-        updates = {
-            "provider": "Free Mobile Updated",
-            "validated": 0
-        }
-        
+
+        updates = {"provider": "Free Mobile Updated", "validated": 0}
+
         updated_contract = service.update_contract(sample_contract_telephone.id, updates)
-        
+
         assert updated_contract is not None
         assert updated_contract.provider == "Free Mobile Updated"
         assert updated_contract.validated == 0

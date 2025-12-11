@@ -1,0 +1,5 @@
+[run]
+omit = 
+    src/pages/*
+    src/services/openai_service_v2.py
+    src/app.py
