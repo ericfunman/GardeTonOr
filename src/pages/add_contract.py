@@ -72,6 +72,10 @@ def show():
         extracted_data = st.session_state["extracted_data"]
         contract_type = st.session_state["contract_type"]
 
+        # DEBUG: Afficher les données brutes pour comprendre le problème
+        with st.expander("🔍 Voir les données brutes (Debug)", expanded=False):
+            st.json(extracted_data)
+
         st.info("Vérifiez et modifiez si nécessaire les données extraites par l'IA")
 
         # Formulaire de validation selon le type de contrat
