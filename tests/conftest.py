@@ -8,9 +8,14 @@ from src.database.models import Base, Contract
 
 
 @pytest.fixture
-def db_engine():
-    """Crée un engine de base de données en mémoire pour les tests."""
-    engine = create_engine("sqlite:///:memory:")
+def db_engine(tmp_path):
+    """Crée un engine de base de données sur fichier temporaire pour les tests."""
+    # Utiliser un fichier temporaire pour permettre le partage entre threads (AppTest)
+    db_path = tmp_path / "test.db"
+    engine = create_engine(
+        f"sqlite:///{db_path}", 
+        connect_args={"check_same_thread": False}
+    )
     Base.metadata.create_all(bind=engine)
     return engine
 
