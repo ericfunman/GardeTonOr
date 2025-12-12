@@ -29,10 +29,19 @@ def get_latest_run(branch, token=None):
         headers["Authorization"] = f"token {token}"
 
     url = f"{GITHUB_API_URL}/actions/runs"
-    params = {"branch": branch, "per_page": 1}
+    # Increase per_page to avoid missing the run if there are many triggered at once
+    params = {"branch": branch, "per_page": 5}
 
     try:
         response = requests.get(url, headers=headers, params=params)
+        
+        # Handle rate limiting explicitly
+        if response.status_code == 403 and "rate limit" in response.text.lower():
+             print("\n⚠️ GitHub API Rate Limit Exceeded.")
+             if not token:
+                 print("Tip: Provide a GITHUB_TOKEN to increase the limit.")
+             sys.exit(1)
+
         response.raise_for_status()
         data = response.json()
         
