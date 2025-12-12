@@ -470,6 +470,4 @@ class TestDashboardPageExtended:
                     found_simu = True
                     break
 
-            assert (
-                found_simu
-            ), "La simulation 'SimuProvider' n'est pas affichée dans les expanders"
+            assert found_simu, "La simulation 'SimuProvider' n'est pas affichée dans les expanders"
