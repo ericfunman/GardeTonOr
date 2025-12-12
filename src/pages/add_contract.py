@@ -7,6 +7,29 @@ from src.services import OpenAIService, PDFService, ContractService
 from src.config import CONTRACT_TYPES
 
 
+def handle_extraction(uploaded_file, contract_type):
+    """Gère l'extraction des données du fichier uploadé."""
+    with get_db() as db:
+        openai_service = OpenAIService()
+        pdf_service = PDFService()
+        contract_service = ContractService(db, openai_service, pdf_service)
+
+        # Lire le contenu du PDF
+        # Si le fichier a déjà été lu, on doit remettre le curseur au début
+        if hasattr(uploaded_file, "seek"):
+            uploaded_file.seek(0)
+        pdf_bytes = uploaded_file.read()
+
+        # Extraire les données
+        extracted_data, pdf_text = contract_service.extract_and_create_contract(
+            pdf_bytes=pdf_bytes,
+            filename=uploaded_file.name,
+            contract_type=contract_type,
+        )
+        
+        return extracted_data, pdf_bytes
+
+
 def show():
     """Affiche la page d'ajout de contrat."""
     st.title("➕ Ajouter un contrat")
@@ -36,29 +59,16 @@ def show():
         if st.button("🔍 Extraire les données", type="primary", use_container_width=True):
             with st.spinner("Extraction en cours... (cela peut prendre quelques secondes)"):
                 try:
-                    with get_db() as db:
-                        openai_service = OpenAIService()
-                        pdf_service = PDFService()
-                        contract_service = ContractService(db, openai_service, pdf_service)
+                    extracted_data, pdf_bytes = handle_extraction(uploaded_file, contract_type)
 
-                        # Lire le contenu du PDF
-                        pdf_bytes = uploaded_file.read()
+                    # Stocker dans session state pour validation
+                    st.session_state["extracted_data"] = extracted_data
+                    st.session_state["pdf_bytes"] = pdf_bytes
+                    st.session_state["filename"] = uploaded_file.name
+                    st.session_state["contract_type"] = contract_type
+                    st.session_state["extraction_done"] = True
 
-                        # Extraire les données
-                        extracted_data, pdf_text = contract_service.extract_and_create_contract(
-                            pdf_bytes=pdf_bytes,
-                            filename=uploaded_file.name,
-                            contract_type=contract_type,
-                        )
-
-                        # Stocker dans session state pour validation
-                        st.session_state["extracted_data"] = extracted_data
-                        st.session_state["pdf_bytes"] = pdf_bytes
-                        st.session_state["filename"] = uploaded_file.name
-                        st.session_state["contract_type"] = contract_type
-                        st.session_state["extraction_done"] = True
-
-                        st.rerun()
+                    st.rerun()
 
                 except Exception as e:
                     st.error(f"❌ Erreur lors de l'extraction : {str(e)}")

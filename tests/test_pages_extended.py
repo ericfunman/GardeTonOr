@@ -373,6 +373,34 @@ class TestComparePageExtended(TestComparePage):
 
                 assert found, "Résultat de l'analyse non trouvé"
 
+    def test_compare_page_preselection(self, db_session, sample_contract_data_telephone):
+        """Test la présélection d'un contrat via session_state."""
+        from src.database.models import Contract
+
+        contract = Contract(
+            contract_type="telephone",
+            provider="Free Mobile",
+            start_date=datetime.now(),
+            anniversary_date=datetime.now(),
+            contract_data=sample_contract_data_telephone,
+            original_filename="test.pdf",
+        )
+        db_session.add(contract)
+        db_session.commit()
+
+        at = AppTest.from_file("src/pages/compare.py")
+        at.session_state["compare_contract_id"] = contract.id
+
+        with patch("src.database.get_db") as mock_get_db:
+            mock_get_db.side_effect = lambda: mock_get_db_context(db_session)
+            at.run(timeout=10)
+
+            assert not at.exception
+            # Vérifier que le contrat est sélectionné (index correct)
+            # Difficile à vérifier directement l'index, mais on peut vérifier que les détails sont affichés
+            # Si sélectionné, on devrait voir les détails JSON
+            assert len(at.json) > 0
+
 
 class TestDashboardPageExtended:
     """Tests supplémentaires pour DashboardPage."""
