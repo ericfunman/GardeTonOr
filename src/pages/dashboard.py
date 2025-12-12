@@ -48,6 +48,15 @@ def show():
 
         st.divider()
 
+        # Callbacks pour la navigation
+        def go_to_compare(c_id):
+            st.session_state["compare_contract_id"] = c_id
+            st.session_state["navigation"] = "⚖️ Comparer"
+
+        def go_to_view(c_id):
+            st.session_state["view_contract_id"] = c_id
+            st.session_state["navigation"] = "👀 Visualisation des contrats"
+
         # Alertes dates anniversaires
         if contracts_needing_attention:
             st.markdown("### ⚠️ Contrats nécessitant attention")
@@ -83,10 +92,12 @@ def show():
                         st.markdown(f"🟢 Dans **{days_until} jour(s)**")
 
                 with col3:
-                    if st.button("🔍 Comparer", key=f"compare_{contract.id}"):
-                        st.session_state["compare_contract_id"] = contract.id
-                        st.session_state["navigation"] = "⚖️ Comparer"
-                        st.rerun()
+                    st.button(
+                        "🔍 Comparer", 
+                        key=f"compare_{contract.id}", 
+                        on_click=go_to_compare, 
+                        args=(contract.id,)
+                    )
 
                     if st.button("🗑️ Supprimer", key=f"delete_{contract.id}"):
                         if contract_service.delete_contract(contract.id):
@@ -131,6 +142,12 @@ def show():
                             cost = f"{contract.contract_data.get('prime_mensuelle', 0):.2f} €/mois"
                         else:
                             cost = f"{contract.contract_data.get('prime_annuelle', 0):.2f} €/an"
+                    elif contract.contract_type == "assurance_habitation":
+                        tarifs = contract.contract_data.get("tarifs", {})
+                        if tarifs.get("prime_mensuelle_ttc"):
+                            cost = f"{tarifs.get('prime_mensuelle_ttc', 0):.2f} €/mois"
+                        elif tarifs.get("prime_annuelle_ttc"):
+                            cost = f"{tarifs.get('prime_annuelle_ttc', 0):.2f} €/an"
                     elif contract.contract_type in ["electricite", "gaz"]:
                         if contract.contract_data.get("estimation_facture_annuelle"):
                             cost_annual = contract.contract_data.get(
@@ -140,7 +157,7 @@ def show():
                         elif contract.contract_data.get("prix_abonnement_mensuel"):
                             cost = f"{contract.contract_data.get('prix_abonnement_mensuel', 0):.2f} €/mois"
 
-                    col1, col2, col3, col4, col5 = st.columns([2, 2, 2, 2, 1])
+                    col1, col2, col3, col4, col5, col6 = st.columns([2, 2, 2, 1, 1, 1])
 
                     with col1:
                         st.markdown(f"**{contract.provider}**")
@@ -155,12 +172,24 @@ def show():
                         st.markdown(f"📅 {contract.anniversary_date.strftime('%d/%m/%Y')}")
 
                     with col4:
-                        if st.button("🔍 Comparer", key=f"comp_list_{contract.id}"):
-                            st.session_state["compare_contract_id"] = contract.id
-                            st.session_state["navigation"] = "⚖️ Comparer"
-                            st.rerun()
+                        st.button(
+                            "👁️", 
+                            key=f"view_list_{contract.id}", 
+                            help="Visualiser",
+                            on_click=go_to_view,
+                            args=(contract.id,)
+                        )
 
                     with col5:
+                        st.button(
+                            "🔍", 
+                            key=f"comp_list_{contract.id}", 
+                            help="Comparer",
+                            on_click=go_to_compare,
+                            args=(contract.id,)
+                        )
+
+                    with col6:
                         if st.button("🗑️", key=f"del_list_{contract.id}", help="Supprimer"):
                             if contract_service.delete_contract(contract.id):
                                 st.success("Supprimé")

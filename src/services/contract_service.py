@@ -161,13 +161,20 @@ class ContractService:
         )
 
         # Créer l'objet Comparison
+        # Gérer la structure imbriquée "analyse" pour les analyses de marché
+        analysis_data = comparison_result["analysis"]
+        recommandation = analysis_data.get("recommandation", "")
+        
+        if "analyse" in analysis_data and isinstance(analysis_data["analyse"], dict):
+             recommandation = analysis_data["analyse"].get("recommandation", recommandation)
+
         comparison = Comparison(
             contract_id=contract_id,
             comparison_type="market_analysis",
             gpt_prompt=comparison_result["prompt"],
             gpt_response=comparison_result["raw_response"],
             comparison_result=comparison_result["analysis"],
-            analysis_summary=comparison_result["analysis"].get("recommandation", ""),
+            analysis_summary=recommandation,
         )
 
         self.db.add(comparison)

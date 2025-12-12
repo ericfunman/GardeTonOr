@@ -432,6 +432,108 @@ def show():
                     "conditions_particulieres": conditions,
                 }
 
+            elif contract_type == "assurance_habitation":
+                col1, col2 = st.columns(2)
+
+                with col1:
+                    provider = st.text_input("Assureur", value=extracted_data.get("assureur", ""))
+                    numero_contrat = st.text_input(
+                        "Numéro de contrat", value=extracted_data.get("numero_contrat", "")
+                    )
+
+                    st.markdown("**Bien assuré**")
+                    bien = extracted_data.get("bien_assure", {})
+                    adresse = st.text_input("Adresse", value=bien.get("adresse", ""))
+                    type_bien = st.text_input("Type de logement", value=bien.get("type_logement", ""))
+                    surface_m2 = st.number_input(
+                        "Surface (m²)", value=float(bien.get("surface_m2", 0) or 0), min_value=0.0
+                    )
+                    nombre_pieces = st.number_input(
+                        "Nombre de pièces", value=int(bien.get("nombre_pieces", 0) or 0), min_value=0
+                    )
+                    
+                    st.markdown("**Équipements spécifiques**")
+                    col_eq1, col_eq2 = st.columns(2)
+                    with col_eq1:
+                        cheminee = st.checkbox("Cheminée", value=bien.get("cheminee", False))
+                        piscine = st.checkbox("Piscine", value=bien.get("piscine", False))
+                    with col_eq2:
+                        veranda = st.checkbox("Véranda", value=bien.get("veranda", False))
+                        dependances = st.checkbox("Dépendances", value=bien.get("dependances", False))
+
+                with col2:
+                    tarifs = extracted_data.get("tarifs", {})
+                    prime_annuelle = st.number_input(
+                        "Prime annuelle (€)",
+                        value=float(tarifs.get("prime_annuelle_ttc", 0) or 0),
+                        min_value=0.0,
+                        step=0.01,
+                    )
+                    prime_mensuelle = st.number_input(
+                        "Prime mensuelle (€)",
+                        value=float(tarifs.get("prime_mensuelle_ttc", 0) or 0),
+                        min_value=0.0,
+                        step=0.01,
+                    )
+                    
+                    franchises = extracted_data.get("franchises", {})
+                    franchise = st.number_input(
+                        "Franchise générale (€)",
+                        value=float(franchises.get("franchise_generale", 0) or 0),
+                        min_value=0.0,
+                        step=0.01,
+                    )
+
+                    dates = extracted_data.get("dates", {})
+                    
+                    # Helper pour parser les dates
+                    def parse_date(date_str):
+                        if not date_str: return datetime.now()
+                        for fmt in ["%d/%m/%Y", "%Y-%m-%d"]:
+                            try:
+                                return datetime.strptime(date_str, fmt)
+                            except ValueError:
+                                continue
+                        return datetime.now()
+
+                    date_effet_val = parse_date(dates.get("date_debut", ""))
+                    date_anniv_val = parse_date(dates.get("date_anniversaire", ""))
+
+                    date_effet = st.date_input("Date d'effet", value=date_effet_val)
+                    date_anniversaire = st.date_input("Date anniversaire", value=date_anniv_val)
+
+                st.markdown("**Garanties incluses**")
+                garanties_list = extracted_data.get("garanties_incluses", [])
+                garanties_text = st.text_area("Liste des garanties", value=", ".join(garanties_list) if isinstance(garanties_list, list) else str(garanties_list))
+
+                # Préparer les données validées
+                validated_data = {
+                    "assureur": provider,
+                    "numero_contrat": numero_contrat,
+                    "bien_assure": {
+                        "adresse": adresse,
+                        "type_logement": type_bien,
+                        "surface_m2": surface_m2,
+                        "nombre_pieces": nombre_pieces,
+                        "cheminee": cheminee,
+                        "piscine": piscine,
+                        "veranda": veranda,
+                        "dependances": dependances
+                    },
+                    "garanties_incluses": [g.strip() for g in garanties_text.split(",")] if garanties_text else [],
+                    "tarifs": {
+                        "prime_annuelle_ttc": prime_annuelle,
+                        "prime_mensuelle_ttc": prime_mensuelle
+                    },
+                    "franchises": {
+                        "franchise_generale": franchise
+                    },
+                    "dates": {
+                        "date_debut": date_effet.strftime("%d/%m/%Y"),
+                        "date_anniversaire": date_anniversaire.strftime("%d/%m/%Y")
+                    }
+                }
+
             elif contract_type == "electricite":
                 elec_data = extracted_data.get("electricite", {})
                 dates_data = extracted_data.get("dates", {})

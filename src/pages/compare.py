@@ -388,6 +388,29 @@ def display_market_analysis(comparison):
                     get_val(best_offer_data, "franchise"),
                 ),
             ]
+        elif c_type == "assurance_habitation":
+            rows = [
+                (
+                    "Assureur",
+                    get_val(current_data, "assureur"),
+                    get_val(best_offer_data, "assureur"),
+                ),
+                (
+                    "Prime annuelle (€)",
+                    get_val(current_data, "tarifs", "prime_annuelle_ttc"),
+                    get_val(best_offer_data, "tarifs", "prime_annuelle_ttc"),
+                ),
+                (
+                    "Franchise (€)",
+                    get_val(current_data, "franchises", "franchise_generale"),
+                    get_val(best_offer_data, "franchises", "franchise_generale"),
+                ),
+                (
+                    "Garanties",
+                    len(get_val(current_data, "garanties_incluses") or []),
+                    len(get_val(best_offer_data, "garanties_incluses") or []),
+                ),
+            ]
 
         if rows:
             df_compare = pd.DataFrame(

@@ -91,10 +91,9 @@ elif page == "📜 Historique":
 
     history.show()
 elif page == "👀 Visualisation des contrats":
-    # Réutiliser le dashboard pour l'instant ou créer une vue spécifique
-    from src.pages import dashboard
+    from src.pages import view_contracts
 
-    dashboard.show()
+    view_contracts.show()
 
 # Footer
 st.sidebar.divider()

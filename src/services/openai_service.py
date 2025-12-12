@@ -170,7 +170,7 @@ class OpenAIService:
 
     def _get_contract_schema(self, contract_type: str) -> Dict[str, Any]:
         """Retourne le schéma JSON générique normalisé selon le type de contrat."""
-        valid_types = ["telephone", "assurance_pno", "electricite", "gaz", "auto"]
+        valid_types = ["telephone", "assurance_pno", "assurance_habitation", "electricite", "gaz", "auto"]
         if contract_type not in valid_types:
             raise ValueError(f"Type de contrat non supporté: {contract_type}")
 
@@ -250,6 +250,34 @@ class OpenAIService:
                 }
             )
 
+        if contract_type == "assurance_habitation":
+            base_schema.update(
+                {
+                    "assureur": "",
+                    "bien_assure": {
+                        "adresse": "",
+                        "type_logement": "",
+                        "statut_occupant": "",
+                        "residence": "",
+                        "surface_m2": 0,
+                        "nombre_pieces": 0,
+                        "dependances": False,
+                        "veranda": False,
+                        "cheminee": False,
+                        "piscine": False,
+                        "systeme_securite": False,
+                    },
+                    "garanties_incluses": [],
+                    "capitaux": {"capital_mobilier": 0, "objets_valeur": 0},
+                    "franchises": {"franchise_generale": 0, "franchise_cat_nat": 0},
+                    "tarifs": {
+                        "prime_annuelle_ttc": 0.0,
+                        "prime_mensuelle_ttc": 0.0,
+                        "frais_dossier": 0.0,
+                    },
+                }
+            )
+
         return base_schema
 
     def _build_extraction_prompt(
@@ -260,19 +288,47 @@ class OpenAIService:
         if schema is None:
             schema = self._get_contract_schema(contract_type)
 
+        specific_instructions = ""
+        if contract_type == "assurance_habitation":
+            specific_instructions = """
+CONSEILS SPÉCIFIQUES POUR ASSURANCE HABITATION :
+- **Assureur** : Cherche le nom en haut du document (ex: AXA, Direct Assurance, Pacifica, etc.).
+- **Numéro de contrat** : Cherche 'Numéro de police', 'Référence', 'N° Contrat', 'Convention'.
+- **Adresse du bien** : Cherche absolument 'Lieu du risque', 'Adresse assurée', 'Situation', 'Bien assuré', 'Adresse du logement'. C'est souvent différent de l'adresse postale.
+- **Détails du bien** :
+    - 'type_logement' : Cherche 'Maison', 'Appartement', 'Pavillon'.
+    - 'surface_m2' : Cherche 'Surface développée', 'Surface habitable', 'm2'.
+    - 'nombre_pieces' : Cherche 'Pièces principales', 'Nombre de pièces', 'PP'.
+    - 'statut_occupant' : Cherche 'Propriétaire', 'Locataire', 'Occupant à titre gratuit'.
+- **Équipements (Booleans)** :
+    - 'cheminee' : Mets true si tu trouves 'Insert', 'Foyer fermé', 'Cheminée', 'Poêle'.
+    - 'piscine' : Mets true si tu trouves 'Piscine', 'Bassin', 'Option Piscine'.
+    - 'veranda' : Mets true si tu trouves 'Véranda'.
+    - 'dependances' : Mets true si tu trouves 'Dépendances', 'Garage', 'Cave'.
+    - 'systeme_securite' : Mets true si tu trouves 'Alarme', 'Télésurveillance', 'Protection vol'.
+- **Tarifs** :
+    - 'prime_annuelle_ttc' : Cherche le montant TOTAL annuel. Mots clés : 'Cotisation annuelle', 'Prime TTC', 'Montant à payer', 'Total annuel', 'Avis d'échéance'. Si tu trouves un montant mensuel, multiplie par 12 ou cherche le total.
+- **Dates** :
+    - 'date_debut' : Cherche 'Date d'effet', 'Prise d'effet', 'Période de garantie'.
+    - 'date_anniversaire' : Cherche 'Echéance principale', 'Date d'échéance'.
+
+IMPORTANT : Si le document contient des "Conditions Particulières" (CP), c'est là que se trouvent les données spécifiques (Adresse, Prix, Surface). Les "Conditions Générales" (CG) décrivent le fonctionnement global. Cherche bien dans tout le texte extrait.
+"""
+
         base_instructions = f"""Analyse ce contrat de type '{contract_type}' et extrais TOUTES les informations disponibles.
 
 SCHÉMA JSON ATTENDU (respecte-le EXACTEMENT) :
 {json.dumps(schema, indent=2, ensure_ascii=False)}
 
 RÈGLES IMPORTANTES :
-1. Extrais TOUTES les informations trouvées dans le document
-2. Pour les champs non trouvés, mets null (pas de string vide)
-3. Respecte les types de données (nombres pour les montants, pas de string)
-4. Dates au format DD/MM/YYYY
-5. Pour les listes (noms, garanties, etc.), utilise des arrays
-6. Sois précis sur les montants (avec décimales)
-7. Réponds UNIQUEMENT avec du JSON valide, sans texte avant ou après
+1. Extrais TOUTES les informations trouvées dans le document.
+2. Pour les champs non trouvés, mets null (pas de string vide).
+3. Respecte les types de données (nombres pour les montants, pas de string).
+4. Dates au format DD/MM/YYYY.
+5. Pour les listes (noms, garanties, etc.), utilise des arrays.
+6. Sois précis sur les montants (avec décimales).
+7. Réponds UNIQUEMENT avec du JSON valide, sans texte avant ou après.
+{specific_instructions}
 
 CONTENU DU CONTRAT :
 {pdf_text}
@@ -583,6 +639,46 @@ Fournis une analyse au format JSON avec:
 }}
 
 Base-toi sur les offres réelles des fournisseurs français (Engie, TotalEnergies, EDF, Eni, Ekwateur, etc.)."""
+
+        elif contract_type == "assurance_habitation":
+            return f"""Analyse ce contrat d'assurance habitation (MRH) et compare-le avec les offres actuelles du marché français en décembre 2025.
+
+Contrat actuel:
+{contract_json}
+
+SCHÉMA DE DONNÉES POUR L'OFFRE (à respecter pour 'meilleure_offre'):
+{schema_json}
+
+Fournis une analyse au format JSON avec:
+{{
+    "analyse": {{
+        "prime_actuelle_annuelle": prime annuelle actuelle (nombre),
+        "estimation_marche": {{
+            "prime_min": prime minimum trouvable pour des conditions similaires (nombre),
+            "prime_moyenne": prime moyenne du marché (nombre),
+            "prime_max": prime maximum (nombre)
+        }},
+        "economie_potentielle_annuelle": économie annuelle possible en euros (nombre, peut être négative),
+        "ratio_qualite_prix": évaluation du rapport qualité/prix (nombre entre 0 et 10),
+        "offres_similaires": [
+            {{
+                "assureur": "nom",
+                "prime_annuelle": prix (nombre),
+                "franchise": montant franchise (nombre),
+                "garanties_principales": ["liste des garanties"],
+                "avantages": ["liste des avantages"],
+                "inconvenients": ["liste des inconvénients"]
+            }}
+        ],
+        "points_attention": ["points importants à vérifier (ex: couverture piscine, cheminée)"],
+        "recommandation": "recommendation claire (garder/changer)",
+        "justification": "explication détaillée",
+        "niveau_competitivite": "excellent/bon/moyen/faible"
+    }},
+    "meilleure_offre": (Remplis ce champ avec les données de la meilleure offre trouvée sur le marché, en respectant EXACTEMENT le schéma fourni ci-dessus. Remplis le maximum de champs possibles avec les données de l'offre, mets null si inconnu.)
+}}
+
+Base-toi sur les offres réelles des assureurs français (Allianz, AXA, Generali, MAIF, MACIF, Groupama, Lemonade, Luko, etc.)."""
 
         else:
             raise ValueError(f"Type de contrat non supporté: {contract_type}")

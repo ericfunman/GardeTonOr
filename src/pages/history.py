@@ -42,9 +42,16 @@ def show():
         total_savings = 0
         for comp in comparisons:
             if comp.comparison_result:
+                # Gestion de la structure imbriquée "analyse"
+                market_analysis = comp.comparison_result.get("analyse", {})
+                if not isinstance(market_analysis, dict):
+                    market_analysis = {}
+
                 savings = (
                     comp.comparison_result.get("economie_potentielle_annuelle", 0)
                     or (comp.comparison_result.get("economie_potentielle_mensuelle", 0) * 12)
+                    or market_analysis.get("economie_potentielle_annuelle", 0)
+                    or (market_analysis.get("economie_potentielle_mensuelle", 0) * 12)
                     or comp.comparison_result.get("comparaison_prix", {}).get(
                         "economie_potentielle", 0
                     )
@@ -118,9 +125,16 @@ def show():
 
             economie = 0
             if comp.comparison_result:
+                # Gestion de la structure imbriquée "analyse"
+                market_analysis = comp.comparison_result.get("analyse", {})
+                if not isinstance(market_analysis, dict):
+                    market_analysis = {}
+
                 economie = (
                     comp.comparison_result.get("economie_potentielle_annuelle", 0)
                     or (comp.comparison_result.get("economie_potentielle_mensuelle", 0) * 12)
+                    or market_analysis.get("economie_potentielle_annuelle", 0)
+                    or (market_analysis.get("economie_potentielle_mensuelle", 0) * 12)
                     or comp.comparison_result.get("comparaison_prix", {}).get(
                         "economie_potentielle", 0
                     )
@@ -128,7 +142,14 @@ def show():
 
             recommandation = ""
             if comp.comparison_result:
-                recommandation = comp.comparison_result.get("recommandation", "")[:50]
+                market_analysis = comp.comparison_result.get("analyse", {})
+                if not isinstance(market_analysis, dict):
+                    market_analysis = {}
+                    
+                recommandation = (
+                    comp.comparison_result.get("recommandation") 
+                    or market_analysis.get("recommandation", "")
+                )[:50]
 
             analysis_data.append(
                 {
@@ -152,9 +173,16 @@ def show():
         chart_data = []
         for comp in filtered_comparisons:
             if comp.comparison_result:
+                # Gestion de la structure imbriquée "analyse"
+                market_analysis = comp.comparison_result.get("analyse", {})
+                if not isinstance(market_analysis, dict):
+                    market_analysis = {}
+
                 economie = (
                     comp.comparison_result.get("economie_potentielle_annuelle", 0)
                     or (comp.comparison_result.get("economie_potentielle_mensuelle", 0) * 12)
+                    or market_analysis.get("economie_potentielle_annuelle", 0)
+                    or (market_analysis.get("economie_potentielle_mensuelle", 0) * 12)
                     or comp.comparison_result.get("comparaison_prix", {}).get(
                         "economie_potentielle", 0
                     )
@@ -165,6 +193,7 @@ def show():
                         "Date": comp.created_at,
                         "Contrat": comp.contract.provider,
                         "Économie (€/an)": economie,
+                        "Taille": abs(economie) + 5,  # Taille minimale pour visibilité
                         "Type": "Marché"
                         if comp.comparison_type == "market_analysis"
                         else "Concurrent",
@@ -181,9 +210,9 @@ def show():
                 color="Contrat",
                 symbol="Type",
                 title="Économies potentielles par analyse",
-                size="Économie (€/an)",
+                size="Taille",
                 size_max=20,
-                hover_data=["Type"],
+                hover_data=["Type", "Économie (€/an)"],
             )
 
             fig.add_hline(y=0, line_dash="dash", line_color="gray", annotation_text="Seuil")

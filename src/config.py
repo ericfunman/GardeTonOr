@@ -27,6 +27,7 @@ CONTRACT_TYPES = {
     "auto": "✨ Détection automatique",
     "telephone": "Téléphone",
     "assurance_pno": "Assurance PNO",
+    "assurance_habitation": "Assurance Habitation",
     "electricite": "Électricité",
     "gaz": "Gaz",
 }
