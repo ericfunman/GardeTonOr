@@ -96,7 +96,7 @@ def show():
                         "🔍 Comparer",
                         key=f"compare_{contract.id}",
                         on_click=go_to_compare,
-                        args=(contract.id,)
+                        args=(contract.id,),
                     )
 
                     if st.button("🗑️ Supprimer", key=f"delete_{contract.id}"):
@@ -177,7 +177,7 @@ def show():
                             key=f"view_list_{contract.id}",
                             help="Visualiser",
                             on_click=go_to_view,
-                            args=(contract.id,)
+                            args=(contract.id,),
                         )
 
                     with col5:
@@ -186,7 +186,7 @@ def show():
                             key=f"comp_list_{contract.id}",
                             help="Comparer",
                             on_click=go_to_compare,
-                            args=(contract.id,)
+                            args=(contract.id,),
                         )
 
                     with col6:

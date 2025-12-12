@@ -22,7 +22,10 @@ def show():
             return
 
         # Sélection du contrat
-        contract_options = {c.id: f"{CONTRACT_TYPES.get(c.contract_type, c.contract_type)} - {c.provider} ({c.anniversary_date.strftime('%d/%m/%Y')})" for c in contracts}
+        contract_options = {
+            c.id: f"{CONTRACT_TYPES.get(c.contract_type, c.contract_type)} - {c.provider} ({c.anniversary_date.strftime('%d/%m/%Y')})"
+            for c in contracts
+        }
 
         # Gestion de la pré-sélection depuis le dashboard
         default_index = 0
@@ -40,7 +43,7 @@ def show():
             "Choisir un contrat à visualiser",
             options=contract_ids,
             format_func=lambda x: contract_options[x],
-            index=default_index
+            index=default_index,
         )
 
         if selected_id:
@@ -55,7 +58,9 @@ def show():
             col1, col2 = st.columns([2, 1])
             with col1:
                 st.subheader(f"{contract.provider}")
-                st.caption(f"Type: {CONTRACT_TYPES.get(contract.contract_type, contract.contract_type)}")
+                st.caption(
+                    f"Type: {CONTRACT_TYPES.get(contract.contract_type, contract.contract_type)}"
+                )
             with col2:
                 st.metric("Date anniversaire", contract.anniversary_date.strftime("%d/%m/%Y"))
 
@@ -117,8 +122,12 @@ def display_assurance_habitation(data):
     col1, col2 = st.columns(2)
     with col1:
         st.markdown("### 🛡️ Garanties & Capitaux")
-        st.markdown(f"**Capital Mobilier:** {data.get('capitaux', {}).get('capital_mobilier', 0):,.2f} €")
-        st.markdown(f"**Objets de valeur:** {data.get('capitaux', {}).get('objets_valeur', 0):,.2f} €")
+        st.markdown(
+            f"**Capital Mobilier:** {data.get('capitaux', {}).get('capital_mobilier', 0):,.2f} €"
+        )
+        st.markdown(
+            f"**Objets de valeur:** {data.get('capitaux', {}).get('objets_valeur', 0):,.2f} €"
+        )
 
         garanties = data.get("garanties_incluses", [])
         if garanties:
@@ -141,7 +150,9 @@ def display_assurance_pno(data):
     st.markdown("### 🏠 Bien Assuré")
     bien = data.get("bien_assure", {})
     st.markdown(f"**Adresse:** {bien.get('adresse', 'N/A')}")
-    st.markdown(f"**Type:** {bien.get('type', 'N/A')} - {bien.get('surface_m2', 0)} m² - {bien.get('nombre_pieces', 0)} pièces")
+    st.markdown(
+        f"**Type:** {bien.get('type', 'N/A')} - {bien.get('surface_m2', 0)} m² - {bien.get('nombre_pieces', 0)} pièces"
+    )
 
     st.divider()
 
@@ -187,7 +198,7 @@ def display_energy(data, type_energy):
     col1, col2 = st.columns(2)
     with col1:
         # PDL / PCE
-        pdl_key = 'pdl' if type_energy == 'electricite' else 'pce'
+        pdl_key = "pdl" if type_energy == "electricite" else "pce"
         pdl_val = energy_data.get(pdl_key)
 
         # Fallback legacy
@@ -196,45 +207,45 @@ def display_energy(data, type_energy):
 
         st.markdown(f"**Point de livraison:** {pdl_val or 'N/A'}")
 
-        if type_energy == 'electricite':
-            puissance = energy_data.get('puissance_souscrite_kva')
+        if type_energy == "electricite":
+            puissance = energy_data.get("puissance_souscrite_kva")
             st.markdown(f"**Puissance:** {puissance if puissance is not None else 'N/A'} kVA")
 
-        conso = energy_data.get('consommation_estimee_annuelle_kwh')
+        conso = energy_data.get("consommation_estimee_annuelle_kwh")
         if not conso and is_legacy:
-            conso = data.get('estimation_conso_annuelle_kwh')
+            conso = data.get("estimation_conso_annuelle_kwh")
 
         if conso:
             st.markdown(f"**Conso estimée:** {conso} kWh/an")
 
     with col2:
         # Tarifs
-        tarifs = energy_data.get('tarifs', {})
+        tarifs = energy_data.get("tarifs", {})
 
         # Abonnement
-        abo = tarifs.get('abonnement_mensuel_ttc')
+        abo = tarifs.get("abonnement_mensuel_ttc")
         if abo is None:
             # Essayer format plat ou legacy
-            abo = energy_data.get('abonnement_mensuel_ttc') or data.get('prix_abonnement_mensuel')
+            abo = energy_data.get("abonnement_mensuel_ttc") or data.get("prix_abonnement_mensuel")
 
         st.metric("Abonnement Mensuel", f"{abo:.2f} €" if abo is not None else "N/A")
 
         # Prix kWh
-        kwh = tarifs.get('prix_kwh_ttc')
+        kwh = tarifs.get("prix_kwh_ttc")
         if kwh is None:
             # Essayer format plat
-            kwh = energy_data.get('prix_kwh_ttc')
+            kwh = energy_data.get("prix_kwh_ttc")
 
         # Legacy format: prix_kwh peut être un dict ou un float
         if kwh is None and is_legacy:
-            legacy_kwh = data.get('prix_kwh')
+            legacy_kwh = data.get("prix_kwh")
             if isinstance(legacy_kwh, dict):
-                kwh = legacy_kwh.get('base') or legacy_kwh.get('heures_pleines')
+                kwh = legacy_kwh.get("base") or legacy_kwh.get("heures_pleines")
             else:
                 kwh = legacy_kwh
 
         st.markdown(f"**Prix kWh:** {kwh:.4f} €" if kwh is not None else "**Prix kWh:** N/A")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     show()

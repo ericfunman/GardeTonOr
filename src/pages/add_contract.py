@@ -444,12 +444,16 @@ def show():
                     st.markdown("**Bien assuré**")
                     bien = extracted_data.get("bien_assure", {})
                     adresse = st.text_input("Adresse", value=bien.get("adresse", ""))
-                    type_bien = st.text_input("Type de logement", value=bien.get("type_logement", ""))
+                    type_bien = st.text_input(
+                        "Type de logement", value=bien.get("type_logement", "")
+                    )
                     surface_m2 = st.number_input(
                         "Surface (m²)", value=float(bien.get("surface_m2", 0) or 0), min_value=0.0
                     )
                     nombre_pieces = st.number_input(
-                        "Nombre de pièces", value=int(bien.get("nombre_pieces", 0) or 0), min_value=0
+                        "Nombre de pièces",
+                        value=int(bien.get("nombre_pieces", 0) or 0),
+                        min_value=0,
                     )
 
                     st.markdown("**Équipements spécifiques**")
@@ -459,7 +463,9 @@ def show():
                         piscine = st.checkbox("Piscine", value=bien.get("piscine", False))
                     with col_eq2:
                         veranda = st.checkbox("Véranda", value=bien.get("veranda", False))
-                        dependances = st.checkbox("Dépendances", value=bien.get("dependances", False))
+                        dependances = st.checkbox(
+                            "Dépendances", value=bien.get("dependances", False)
+                        )
 
                 with col2:
                     tarifs = extracted_data.get("tarifs", {})
@@ -505,7 +511,12 @@ def show():
 
                 st.markdown("**Garanties incluses**")
                 garanties_list = extracted_data.get("garanties_incluses", [])
-                garanties_text = st.text_area("Liste des garanties", value=", ".join(garanties_list) if isinstance(garanties_list, list) else str(garanties_list))
+                garanties_text = st.text_area(
+                    "Liste des garanties",
+                    value=", ".join(garanties_list)
+                    if isinstance(garanties_list, list)
+                    else str(garanties_list),
+                )
 
                 # Préparer les données validées
                 validated_data = {
@@ -519,20 +530,20 @@ def show():
                         "cheminee": cheminee,
                         "piscine": piscine,
                         "veranda": veranda,
-                        "dependances": dependances
+                        "dependances": dependances,
                     },
-                    "garanties_incluses": [g.strip() for g in garanties_text.split(",")] if garanties_text else [],
+                    "garanties_incluses": [g.strip() for g in garanties_text.split(",")]
+                    if garanties_text
+                    else [],
                     "tarifs": {
                         "prime_annuelle_ttc": prime_annuelle,
-                        "prime_mensuelle_ttc": prime_mensuelle
+                        "prime_mensuelle_ttc": prime_mensuelle,
                     },
-                    "franchises": {
-                        "franchise_generale": franchise
-                    },
+                    "franchises": {"franchise_generale": franchise},
                     "dates": {
                         "date_debut": date_effet.strftime("%d/%m/%Y"),
-                        "date_anniversaire": date_anniversaire.strftime("%d/%m/%Y")
-                    }
+                        "date_anniversaire": date_anniversaire.strftime("%d/%m/%Y"),
+                    },
                 }
 
             elif contract_type == "electricite":

@@ -28,12 +28,10 @@ class TestViewContractsPage:
             anniversary_date=datetime.now(),
             contract_data={
                 "fournisseur": "EDF",
-                "electricite": {
-                    "tarifs": {"abonnement_mensuel_ttc": 15.0, "prix_kwh_ttc": 0.20}
-                }
+                "electricite": {"tarifs": {"abonnement_mensuel_ttc": 15.0, "prix_kwh_ttc": 0.20}},
             },
             original_filename="test.pdf",
-            validated=1
+            validated=1,
         )
         db_session.add(contract)
         db_session.commit()
@@ -59,11 +57,11 @@ class TestViewContractsPage:
                 "electricite": {
                     "pdl": "123456789",
                     "puissance_souscrite_kva": 6,
-                    "tarifs": {"abonnement_mensuel_ttc": 12.0, "prix_kwh_ttc": 0.18}
-                }
+                    "tarifs": {"abonnement_mensuel_ttc": 12.0, "prix_kwh_ttc": 0.18},
+                },
             },
             original_filename="total.pdf",
-            validated=1
+            validated=1,
         )
         db_session.add(contract)
         db_session.commit()
@@ -118,10 +116,10 @@ class TestViewContractsPage:
                 "assureur": "Generali",
                 "prime_annuelle": 150.0,
                 "franchise": 200.0,
-                "adresse_assuree": "10 rue de la Liberté"
+                "adresse_assuree": "10 rue de la Liberté",
             },
             original_filename="pno.pdf",
-            validated=1
+            validated=1,
         )
         db_session.add(contract)
         db_session.commit()
@@ -162,7 +160,7 @@ class TestViewContractsPage:
             anniversary_date=datetime.now(),
             contract_data={"fournisseur": "Engie"},
             original_filename="engie.pdf",
-            validated=1
+            validated=1,
         )
         db_session.add(contract)
         db_session.commit()
@@ -188,7 +186,7 @@ class TestViewContractsPage:
             anniversary_date=datetime.now(),
             contract_data={"fournisseur": "Engie"},
             original_filename="engie.pdf",
-            validated=1
+            validated=1,
         )
         db_session.add(contract)
         db_session.commit()
@@ -214,16 +212,16 @@ class TestViewContractsPage:
             anniversary_date=datetime.now(),
             contract_data={"fournisseur": "Fake"},
             original_filename="fake.pdf",
-            validated=1
+            validated=1,
         )
         db_session.add(contract)
         db_session.commit()
 
         at = AppTest.from_file("src/pages/view_contracts.py")
 
-        with patch("src.database.get_db") as mock_get_db, \
-             patch("src.services.ContractService.get_contract_by_id") as mock_get_contract:
-
+        with patch("src.database.get_db") as mock_get_db, patch(
+            "src.services.ContractService.get_contract_by_id"
+        ) as mock_get_contract:
             mock_get_db.side_effect = lambda: mock_get_db_context(db_session)
             # On laisse get_all_contracts fonctionner normalement (via le vrai service ou mocké si besoin)
             # Mais on force get_contract_by_id à retourner None
@@ -249,12 +247,12 @@ class TestViewContractsPage:
                     "type_logement": "Appartement",
                     "surface_m2": 50,
                     "piscine": False,
-                    "cheminee": True
+                    "cheminee": True,
                 },
-                "tarifs": {"prime_annuelle_ttc": 200.0}
+                "tarifs": {"prime_annuelle_ttc": 200.0},
             },
             original_filename="axa.pdf",
-            validated=1
+            validated=1,
         )
         db_session.add(contract)
         db_session.commit()
@@ -282,10 +280,10 @@ class TestViewContractsPage:
                 "fournisseur": "Sosh",
                 "forfait_nom": "Forfait 20Go",
                 "data_go": 20,
-                "prix_mensuel": 19.99
+                "prix_mensuel": 19.99,
             },
             original_filename="sosh.pdf",
-            validated=1
+            validated=1,
         )
         db_session.add(contract)
         db_session.commit()
@@ -312,10 +310,10 @@ class TestViewContractsPage:
             contract_data={
                 "fournisseur": "LegacyProvider",
                 "prix_kwh": 0.15,  # Format plat
-                "prix_abonnement": 10.0
+                "prix_abonnement": 10.0,
             },
             original_filename="legacy.pdf",
-            validated=1
+            validated=1,
         )
         db_session.add(contract)
         db_session.commit()

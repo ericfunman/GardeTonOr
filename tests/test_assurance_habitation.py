@@ -16,42 +16,35 @@ class TestAssuranceHabitation:
     def test_extract_assurance_habitation(self, openai_service):
         # Mock response
         mock_response = MagicMock()
-        mock_response.choices[0].message.content = json.dumps({
-            "type_contrat": "assurance_habitation",
-            "assureur": "Maif",
-            "numero_contrat": "123456789",
-            "bien_assure": {
-                "adresse": "10 Rue de la Paix, 75000 Paris",
-                "type_logement": "Maison",
-                "statut_occupant": "Propriétaire",
-                "residence": "Principale",
-                "surface_m2": 120,
-                "nombre_pieces": 5,
-                "dependances": True,
-                "veranda": False,
-                "cheminee": True,
-                "piscine": True,
-                "systeme_securite": True
-            },
-            "garanties_incluses": ["Incendie", "Dégâts des eaux", "Vol"],
-            "capitaux": {
-                "capital_mobilier": 50000,
-                "objets_valeur": 5000
-            },
-            "franchises": {
-                "franchise_generale": 150,
-                "franchise_cat_nat": 380
-            },
-            "tarifs": {
-                "prime_annuelle_ttc": 450.50,
-                "prime_mensuelle_ttc": 37.54,
-                "frais_dossier": 0
-            },
-            "dates": {
-                "date_debut": "01/01/2024",
-                "date_anniversaire": "01/01/2025"
+        mock_response.choices[0].message.content = json.dumps(
+            {
+                "type_contrat": "assurance_habitation",
+                "assureur": "Maif",
+                "numero_contrat": "123456789",
+                "bien_assure": {
+                    "adresse": "10 Rue de la Paix, 75000 Paris",
+                    "type_logement": "Maison",
+                    "statut_occupant": "Propriétaire",
+                    "residence": "Principale",
+                    "surface_m2": 120,
+                    "nombre_pieces": 5,
+                    "dependances": True,
+                    "veranda": False,
+                    "cheminee": True,
+                    "piscine": True,
+                    "systeme_securite": True,
+                },
+                "garanties_incluses": ["Incendie", "Dégâts des eaux", "Vol"],
+                "capitaux": {"capital_mobilier": 50000, "objets_valeur": 5000},
+                "franchises": {"franchise_generale": 150, "franchise_cat_nat": 380},
+                "tarifs": {
+                    "prime_annuelle_ttc": 450.50,
+                    "prime_mensuelle_ttc": 37.54,
+                    "frais_dossier": 0,
+                },
+                "dates": {"date_debut": "01/01/2024", "date_anniversaire": "01/01/2025"},
             }
-        })
+        )
 
         # Setup mock client
         openai_service.client.chat.completions.create.return_value = mock_response
@@ -70,31 +63,29 @@ class TestAssuranceHabitation:
     def test_compare_assurance_habitation(self, openai_service):
         # Mock response
         mock_response = MagicMock()
-        mock_response.choices[0].message.content = json.dumps({
-            "analyse": {
-                "prime_actuelle_annuelle": 450.50,
-                "estimation_marche": {
-                    "prime_min": 350,
-                    "prime_moyenne": 420,
-                    "prime_max": 600
+        mock_response.choices[0].message.content = json.dumps(
+            {
+                "analyse": {
+                    "prime_actuelle_annuelle": 450.50,
+                    "estimation_marche": {"prime_min": 350, "prime_moyenne": 420, "prime_max": 600},
+                    "economie_potentielle_annuelle": 30.50,
+                    "ratio_qualite_prix": 8,
+                    "offres_similaires": [],
+                    "points_attention": ["Vérifier la garantie piscine"],
+                    "recommandation": "garder",
+                    "justification": "Bon prix pour les garanties incluses",
+                    "niveau_competitivite": "bon",
                 },
-                "economie_potentielle_annuelle": 30.50,
-                "ratio_qualite_prix": 8,
-                "offres_similaires": [],
-                "points_attention": ["Vérifier la garantie piscine"],
-                "recommandation": "garder",
-                "justification": "Bon prix pour les garanties incluses",
-                "niveau_competitivite": "bon"
-            },
-            "meilleure_offre": {}
-        })
+                "meilleure_offre": {},
+            }
+        )
 
         openai_service.client.chat.completions.create.return_value = mock_response
 
         contract_data = {
             "type_contrat": "assurance_habitation",
             "assureur": "Maif",
-            "tarifs": {"prime_annuelle_ttc": 450.50}
+            "tarifs": {"prime_annuelle_ttc": 450.50},
         }
 
         result = openai_service.compare_with_market(contract_data, "assurance_habitation")
