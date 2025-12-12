@@ -1,9 +1,10 @@
 """Tests étendus pour les pages Streamlit."""
 import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 from streamlit.testing.v1 import AppTest
 from contextlib import contextmanager
 from datetime import datetime
+
 
 @contextmanager
 def mock_get_db_context(session):
@@ -13,6 +14,7 @@ def mock_get_db_context(session):
     finally:
         pass
 
+
 class TestAddContractPage:
     """Tests pour la page d'ajout de contrat."""
 
@@ -20,7 +22,7 @@ class TestAddContractPage:
         """Test l'état initial de la page."""
         at = AppTest.from_file("src/pages/add_contract.py")
         at.run(timeout=10)
-        
+
         assert not at.exception
         assert "Ajouter un contrat" in at.title[0].value
         assert "Étape 1 : Importer le document" in at.markdown[1].value
@@ -28,7 +30,7 @@ class TestAddContractPage:
     def test_add_contract_extraction_simulation(self, db_session):
         """Simule une extraction et vérifie l'étape 2."""
         at = AppTest.from_file("src/pages/add_contract.py")
-        
+
         # Simuler l'état de session après extraction
         at.session_state["extraction_done"] = True
         at.session_state["contract_type"] = "electricite"
@@ -49,11 +51,11 @@ class TestAddContractPage:
         assert not at.exception
         # Vérifier que l'étape 2 est affichée
         assert "Étape 2 : Valider les données extraites" in [m.value for m in at.markdown if "Étape 2" in m.value][0]
-        
+
         # Vérifier que les champs de formulaire sont pré-remplis
         # Note: Streamlit AppTest ne permet pas facilement d'inspecter les valeurs par défaut des widgets
         # mais on peut vérifier que les widgets existent.
-        
+
         # On devrait avoir des text_input pour fournisseur, etc.
         # Le nombre exact dépend de l'implémentation, mais on peut vérifier qu'il y en a.
         assert len(at.text_input) > 0
@@ -63,7 +65,7 @@ class TestAddContractPage:
     def test_add_contract_save_simulation(self, db_session):
         """Simule la sauvegarde d'un contrat."""
         at = AppTest.from_file("src/pages/add_contract.py")
-        
+
         # Simuler l'état de session après extraction
         at.session_state["extraction_done"] = True
         at.session_state["contract_type"] = "electricite"
@@ -79,9 +81,9 @@ class TestAddContractPage:
 
         with patch("src.database.get_db") as mock_get_db:
             mock_get_db.return_value = mock_get_db_context(db_session)
-            
+
             at.run(timeout=10)
-            
+
             # Vérifier que le formulaire est rendu (présence de champs)
             assert len(at.text_input) > 0
             assert len(at.number_input) > 0
@@ -93,11 +95,11 @@ class TestComparePage:
     def test_compare_page_initial_state(self, db_session):
         """Test l'état initial de la page de comparaison."""
         at = AppTest.from_file("src/pages/compare.py")
-        
+
         with patch("src.database.get_db") as mock_get_db:
             mock_get_db.return_value = mock_get_db_context(db_session)
             at.run(timeout=10)
-            
+
         assert not at.exception
         assert "Comparer un contrat" in at.title[0].value
 
@@ -116,13 +118,14 @@ class TestComparePage:
         db_session.commit()
 
         at = AppTest.from_file("src/pages/compare.py")
-        
+
         with patch("src.database.get_db") as mock_get_db:
             mock_get_db.return_value = mock_get_db_context(db_session)
             at.run(timeout=10)
-            
+
         # Vérifier qu'on a un selectbox pour choisir le contrat
         assert len(at.selectbox) > 0
+
 
 class TestHistoryPage:
     """Tests pour la page d'historique."""
@@ -130,18 +133,18 @@ class TestHistoryPage:
     def test_history_page_loads(self, db_session):
         """Test que la page historique se charge."""
         at = AppTest.from_file("src/pages/history.py")
-        
+
         with patch("src.database.get_db") as mock_get_db:
             mock_get_db.return_value = mock_get_db_context(db_session)
             at.run(timeout=10)
-            
+
         assert not at.exception
         assert "Historique" in at.title[0].value
 
     def test_history_page_with_data(self, db_session, sample_contract_data_telephone):
         """Test la page historique avec des données."""
         from src.database.models import Contract, Comparison
-        
+
         contract = Contract(
             contract_type="telephone",
             provider="Free Mobile",
@@ -152,7 +155,7 @@ class TestHistoryPage:
         )
         db_session.add(contract)
         db_session.flush()
-        
+
         comp = Comparison(
             contract_id=contract.id,
             comparison_type="market_analysis",
@@ -165,15 +168,16 @@ class TestHistoryPage:
         db_session.commit()
 
         at = AppTest.from_file("src/pages/history.py")
-        
+
         with patch("src.database.get_db") as mock_get_db:
             mock_get_db.return_value = mock_get_db_context(db_session)
             at.run(timeout=10)
-            
+
         # Vérifier qu'on affiche les métriques
         assert len(at.metric) > 0
         # Vérifier qu'on a des expanders pour les détails
         assert len(at.expander) > 0
+
 
 class TestImportTotalEnergiesPage:
     """Tests pour la page d'import TotalEnergies."""
@@ -188,11 +192,11 @@ class TestImportTotalEnergiesPage:
     def test_import_page_save(self, db_session):
         """Test la sauvegarde depuis la page d'import."""
         at = AppTest.from_file("src/pages/import_totalenergies.py")
-        
+
         with patch("src.pages.import_totalenergies.SessionLocal") as mock_session_local:
             mock_session_local.return_value = db_session
             at.run(timeout=10)
-            
+
             # Trouver le bouton de sauvegarde
             save_btn = [b for b in at.button if "Sauvegarder" in b.label]
             if save_btn:
@@ -205,13 +209,14 @@ class TestImportTotalEnergiesPage:
                 # Ici on mock SessionLocal pour retourner NOTRE session
                 pass
 
+
 class TestAddContractPageExtended(TestAddContractPage):
     """Tests supplémentaires pour AddContractPage."""
 
     def test_add_contract_dual_energy(self, db_session):
         """Test l'ajout d'un contrat dual (Elec + Gaz)."""
         at = AppTest.from_file("src/pages/add_contract.py")
-        
+
         # Simuler l'état de session après extraction
         at.session_state["extraction_done"] = True
         at.session_state["contract_type"] = "electricite_gaz"
@@ -238,14 +243,14 @@ class TestAddContractPageExtended(TestAddContractPage):
         with patch("src.database.get_db") as mock_get_db:
             mock_get_db.return_value = mock_get_db_context(db_session)
             at.run(timeout=10)
-            
+
             # Vérifier qu'on a des onglets ou des sections pour Elec et Gaz
             assert len(at.tabs) >= 2
 
     def test_add_contract_assurance_pno(self, db_session):
         """Test l'ajout d'un contrat Assurance PNO."""
         at = AppTest.from_file("src/pages/add_contract.py")
-        
+
         at.session_state["extraction_done"] = True
         at.session_state["contract_type"] = "assurance_pno"
         at.session_state["extracted_data"] = {
@@ -261,14 +266,14 @@ class TestAddContractPageExtended(TestAddContractPage):
         with patch("src.database.get_db") as mock_get_db:
             mock_get_db.side_effect = lambda: mock_get_db_context(db_session)
             at.run(timeout=10)
-            
+
             # Vérifier les champs spécifiques
             assert len(at.text_input) > 0
 
     def test_add_contract_mobile(self, db_session):
         """Test l'ajout d'un contrat Mobile."""
         at = AppTest.from_file("src/pages/add_contract.py")
-        
+
         at.session_state["extraction_done"] = True
         at.session_state["contract_type"] = "telephone"
         at.session_state["extracted_data"] = {
@@ -284,8 +289,9 @@ class TestAddContractPageExtended(TestAddContractPage):
         with patch("src.database.get_db") as mock_get_db:
             mock_get_db.return_value = mock_get_db_context(db_session)
             at.run(timeout=10)
-            
+
             assert len(at.text_input) > 0
+
 
 class TestComparePageExtended(TestComparePage):
     """Tests supplémentaires pour ComparePage."""
@@ -305,11 +311,11 @@ class TestComparePageExtended(TestComparePage):
         db_session.commit()
 
         at = AppTest.from_file("src/pages/compare.py")
-        
+
         # Mocker OpenAIService pour retourner une analyse
         with patch("src.database.get_db") as mock_get_db, \
              patch("src.services.openai_service.OpenAIService.compare_with_market") as mock_compare:
-            
+
             mock_get_db.side_effect = lambda: mock_get_db_context(db_session)
             mock_compare.return_value = {
                 "analysis": {
@@ -323,7 +329,7 @@ class TestComparePageExtended(TestComparePage):
                 "prompt": "test prompt",
                 "raw_response": "test response"
             }
-            
+
             at.run(timeout=10)
 
             # Sélectionner le contrat (si possible via session state ou index)
@@ -336,12 +342,12 @@ class TestComparePageExtended(TestComparePage):
             if analyze_btns:
                 analyze_btns[0].click()
                 at.run(timeout=10)
-                
+
                 # Vérifier si le mock a été appelé
                 # Note: AppTest tourne dans un thread, donc le mock doit être thread-safe ou global
                 # Ici on patch globalement donc ça devrait aller
                 # assert mock_compare.called
-                
+
                 # Vérifier les exceptions
                 if at.exception:
                     pytest.fail(f"Exception dans la page: {at.exception[0].message}")
@@ -424,4 +430,3 @@ class TestDashboardPageExtended:
                     break
 
             assert found_provider, "Le fournisseur 'Free Mobile' n'est pas affiché dans le dashboard"
-

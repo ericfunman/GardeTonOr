@@ -35,7 +35,7 @@ class TestOpenAIServiceExtended:
     def test_extract_contract_data_electricite(self, mock_openai_client):
         """Test d'extraction pour l'électricité."""
         service = OpenAIService(api_key="test")
-        
+
         expected_data = {
             "fournisseur": "EDF",
             "prix_kwh": {"base": 0.20},
@@ -49,7 +49,7 @@ class TestOpenAIServiceExtended:
         mock_openai_client.chat.completions.create.return_value = mock_response
 
         result = service.extract_contract_data("PDF content", "electricite")
-        
+
         assert result["data"] == expected_data
         # Check user message content
         assert "electricite" in mock_openai_client.chat.completions.create.call_args[1]["messages"][1]["content"]
@@ -57,13 +57,13 @@ class TestOpenAIServiceExtended:
     def test_extract_contract_data_gaz(self, mock_openai_client):
         """Test d'extraction pour le gaz."""
         service = OpenAIService(api_key="test")
-        
+
         expected_data = {
             "fournisseur": "Engie",
             "prix_kwh": 0.08,
             "prix_abonnement_mensuel": 20.0
         }
-        
+
         mock_response = Mock()
         mock_choice = Mock()
         mock_choice.message.content = json.dumps(expected_data)
@@ -71,7 +71,7 @@ class TestOpenAIServiceExtended:
         mock_openai_client.chat.completions.create.return_value = mock_response
 
         result = service.extract_contract_data("PDF content", "gaz")
-        
+
         assert result["data"] == expected_data
         # Check user message content
         assert "gaz" in mock_openai_client.chat.completions.create.call_args[1]["messages"][1]["content"]
@@ -79,7 +79,7 @@ class TestOpenAIServiceExtended:
     def test_extract_contract_data_json_error(self, mock_openai_client):
         """Test de gestion d'erreur JSON malformé."""
         service = OpenAIService(api_key="test")
-        
+
         mock_response = Mock()
         mock_choice = Mock()
         mock_choice.message.content = "Not a JSON string"
@@ -92,7 +92,7 @@ class TestOpenAIServiceExtended:
     def test_extract_contract_data_api_error(self, mock_openai_client):
         """Test de gestion d'erreur API."""
         service = OpenAIService(api_key="test")
-        
+
         mock_openai_client.chat.completions.create.side_effect = Exception("API Error")
 
         with pytest.raises(Exception, match="Erreur lors de l'extraction des données"):
