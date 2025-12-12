@@ -4,7 +4,12 @@ import pandas as pd
 
 from src.database import get_db
 from src.services import OpenAIService, PDFService, ContractService
-from src.config import CONTRACT_TYPES
+from src.config import (
+    CONTRACT_TYPES,
+    DATE_FORMAT,
+    LABEL_ECONOMY,
+    LABEL_SURCOST,
+)
 
 
 def show():
@@ -78,60 +83,11 @@ def show():
 
             # Analyse de marché
             if comparison_type == "📊 Analyse de marché":
-                st.markdown("#### 📊 Analyse de marché")
-                st.info(
-                    "L'IA va analyser votre contrat et le comparer avec les offres "
-                    "actuelles disponibles sur le marché français."
-                )
-
-                if st.button("🚀 Lancer l'analyse", type="primary", use_container_width=True):
-                    with st.spinner("Analyse en cours... (cela peut prendre 30 secondes)"):
-                        try:
-                            comparison = contract_service.compare_with_market(contract_id)
-
-                            st.success("✅ Analyse terminée !")
-
-                            # Afficher les résultats
-                            display_market_analysis(comparison)
-
-                        except Exception as e:
-                            st.error(f"❌ Erreur lors de l'analyse : {str(e)}")
-                            st.exception(e)
+                handle_market_analysis(contract_service, contract_id)
 
             # Comparaison avec concurrent
             else:
-                st.markdown("#### 🆚 Comparer avec un devis concurrent")
-                st.info(
-                    "Uploadez un devis concurrent au format PDF. "
-                    "L'IA va extraire les données et comparer les deux offres."
-                )
-
-                competitor_file = st.file_uploader(
-                    "Choisissez le PDF du devis concurrent", type=["pdf"], key="competitor_upload"
-                )
-
-                if competitor_file is not None:
-                    st.success(f"✅ Fichier chargé : {competitor_file.name}")
-
-                    if st.button("🚀 Comparer les offres", type="primary", use_container_width=True):
-                        with st.spinner("Comparaison en cours... (cela peut prendre 45 secondes)"):
-                            try:
-                                competitor_bytes = competitor_file.read()
-
-                                comparison = contract_service.compare_with_competitor(
-                                    contract_id=contract_id,
-                                    competitor_pdf_bytes=competitor_bytes,
-                                    competitor_filename=competitor_file.name,
-                                )
-
-                                st.success("✅ Comparaison terminée !")
-
-                                # Afficher les résultats
-                                display_competitor_comparison(comparison)
-
-                            except Exception as e:
-                                st.error(f"❌ Erreur lors de la comparaison : {str(e)}")
-                                st.exception(e)
+                handle_competitor_comparison(contract_service, contract_id)
 
             # Historique des comparaisons pour ce contrat
             st.divider()
@@ -143,7 +99,7 @@ def show():
                 for i, comp in enumerate(comparisons):
                     with st.expander(
                         f"{'📊' if comp.comparison_type == 'market_analysis' else '🆚'} "
-                        f"{comp.created_at.strftime('%d/%m/%Y %H:%M')} - {comp.analysis_summary[:50]}...",
+                        f"{comp.created_at.strftime(f'{DATE_FORMAT} %H:%M')} - {comp.analysis_summary[:50]}...",
                         expanded=(i == 0),
                     ):
                         if comp.comparison_type == "market_analysis":
@@ -225,13 +181,13 @@ def display_market_analysis(comparison):
             st.metric(
                 "Économie potentielle/an",
                 f"{economie_annuelle:.2f} €",
-                delta="Économie" if economie_annuelle > 0 else "Surcoût",
+                delta=LABEL_ECONOMY if economie_annuelle > 0 else LABEL_SURCOST,
             )
         elif economie_mensuelle:
             st.metric(
                 "Économie potentielle/mois",
                 f"{economie_mensuelle:.2f} €",
-                delta="Économie" if economie_mensuelle > 0 else "Surcoût",
+                delta=LABEL_ECONOMY if economie_mensuelle > 0 else LABEL_SURCOST,
             )
 
     # Offres similaires
@@ -470,7 +426,7 @@ def display_competitor_comparison(comparison):
         st.metric(
             "Économie potentielle",
             f"{abs(economie):.2f} €",
-            delta="Économie" if economie > 0 else "Surcoût",
+            delta=LABEL_ECONOMY if economie > 0 else LABEL_SURCOST,
         )
 
     # Comparaison des services
@@ -525,6 +481,66 @@ def display_competitor_comparison(comparison):
     # Réponse complète
     with st.expander("📄 Analyse complète de l'IA"):
         st.json(result)
+
+
+
+def handle_market_analysis(contract_service, contract_id):
+    """Gère l'analyse de marché."""
+    st.markdown("#### 📊 Analyse de marché")
+    st.info(
+        "L'IA va analyser votre contrat et le comparer avec les offres "
+        "actuelles disponibles sur le marché français."
+    )
+
+    if st.button("🚀 Lancer l'analyse", type="primary", use_container_width=True):
+        with st.spinner("Analyse en cours... (cela peut prendre 30 secondes)"):
+            try:
+                comparison = contract_service.compare_with_market(contract_id)
+
+                st.success("✅ Analyse terminée !")
+
+                # Afficher les résultats
+                display_market_analysis(comparison)
+
+            except Exception as e:
+                st.error(f"❌ Erreur lors de l'analyse : {str(e)}")
+                st.exception(e)
+
+
+def handle_competitor_comparison(contract_service, contract_id):
+    """Gère la comparaison avec un concurrent."""
+    st.markdown("#### 🆚 Comparer avec un devis concurrent")
+    st.info(
+        "Uploadez un devis concurrent au format PDF. "
+        "L'IA va extraire les données et comparer les deux offres."
+    )
+
+    competitor_file = st.file_uploader(
+        "Choisissez le PDF du devis concurrent", type=["pdf"], key="competitor_upload"
+    )
+
+    if competitor_file is not None:
+        st.success(f"✅ Fichier chargé : {competitor_file.name}")
+
+        if st.button("🚀 Comparer les offres", type="primary", use_container_width=True):
+            with st.spinner("Comparaison en cours... (cela peut prendre 45 secondes)"):
+                try:
+                    competitor_bytes = competitor_file.read()
+
+                    comparison = contract_service.compare_with_competitor(
+                        contract_id=contract_id,
+                        competitor_pdf_bytes=competitor_bytes,
+                        competitor_filename=competitor_file.name,
+                    )
+
+                    st.success("✅ Comparaison terminée !")
+
+                    # Afficher les résultats
+                    display_competitor_comparison(comparison)
+
+                except Exception as e:
+                    st.error(f"❌ Erreur lors de la comparaison : {str(e)}")
+                    st.exception(e)
 
 
 if __name__ == "__main__":

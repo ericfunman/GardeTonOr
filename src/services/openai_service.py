@@ -4,6 +4,7 @@ from typing import Dict, Any, Optional
 from openai import OpenAI
 
 from src.config import OPENAI_API_KEY, OPENAI_MODEL
+from src.exceptions import OpenAIServiceError
 
 
 class OpenAIService:
@@ -79,7 +80,7 @@ class OpenAIService:
             }
 
         except Exception as e:
-            raise Exception(f"Erreur lors de l'extraction des données: {str(e)}")
+            raise OpenAIServiceError(f"Erreur lors de l'extraction des données: {str(e)}") from e
 
     def compare_with_market(
         self, contract_data: Dict[str, Any], contract_type: str
@@ -121,7 +122,7 @@ class OpenAIService:
             return {"analysis": comparison_result, "prompt": prompt, "raw_response": result}
 
         except Exception as e:
-            raise Exception(f"Erreur lors de la comparaison de marché: {str(e)}")
+            raise OpenAIServiceError(f"Erreur lors de la comparaison de marché: {str(e)}") from e
 
     def compare_with_competitor(
         self, current_contract: Dict[str, Any], competitor_data: Dict[str, Any], contract_type: str
@@ -166,7 +167,7 @@ class OpenAIService:
             return {"analysis": comparison_result, "prompt": prompt, "raw_response": result}
 
         except Exception as e:
-            raise Exception(f"Erreur lors de la comparaison avec concurrent: {str(e)}")
+            raise OpenAIServiceError(f"Erreur lors de la comparaison avec concurrent: {str(e)}") from e
 
     def _get_contract_schema(self, contract_type: str) -> Dict[str, Any]:
         """Retourne le schéma JSON générique normalisé selon le type de contrat."""

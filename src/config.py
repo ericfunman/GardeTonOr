@@ -39,3 +39,15 @@ STREAMLIT_CONFIG = {
     "layout": "wide",
     "initial_sidebar_state": "expanded",
 }
+
+# Constantes d'affichage
+DATE_FORMAT = "%d/%m/%Y"
+LABEL_MONTHLY_SUB = "Abonnement mensuel (€)"
+LABEL_PRICE_KWH = "Prix kWh (€)"
+LABEL_START_DATE = "Date de début"
+LABEL_ANNIVERSARY_DATE = "Date anniversaire"
+LABEL_CONTRACT_NUMBER = "Numéro de contrat"
+LABEL_ECONOMY = "Économie"
+LABEL_SURCOST = "Surcoût"
+LABEL_ECONOMY_YEAR = "Économie (€/an)"
+LABEL_TOTAL_ECONOMY_YEAR = "Économie totale (€/an)"

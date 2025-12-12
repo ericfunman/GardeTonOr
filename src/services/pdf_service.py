@@ -1,6 +1,7 @@
 """Service d'extraction de texte depuis les fichiers PDF."""
 import io
 import pdfplumber
+from src.exceptions import PDFServiceError
 
 
 class PDFService:
@@ -37,7 +38,7 @@ class PDFService:
             return full_text
 
         except Exception as e:
-            raise Exception(f"Erreur lors de l'extraction du PDF: {str(e)}")
+            raise PDFServiceError(f"Erreur lors de l'extraction du PDF: {str(e)}") from e
 
     @staticmethod
     def validate_pdf(pdf_bytes: bytes) -> bool:

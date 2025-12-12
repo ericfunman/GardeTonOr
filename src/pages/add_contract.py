@@ -4,7 +4,15 @@ from datetime import datetime
 
 from src.database import get_db
 from src.services import OpenAIService, PDFService, ContractService
-from src.config import CONTRACT_TYPES
+from src.config import (
+    CONTRACT_TYPES,
+    DATE_FORMAT,
+    LABEL_MONTHLY_SUB,
+    LABEL_PRICE_KWH,
+    LABEL_START_DATE,
+    LABEL_ANNIVERSARY_DATE,
+    LABEL_CONTRACT_NUMBER,
+)
 
 
 def handle_extraction(uploaded_file, contract_type):
@@ -21,7 +29,7 @@ def handle_extraction(uploaded_file, contract_type):
         pdf_bytes = uploaded_file.read()
 
         # Extraire les données
-        extracted_data, pdf_text = contract_service.extract_and_create_contract(
+        extracted_data, _ = contract_service.extract_and_create_contract(
             pdf_bytes=pdf_bytes,
             filename=uploaded_file.name,
             contract_type=contract_type,
@@ -146,7 +154,7 @@ def show():
                             key="puis_dual",
                         )
                         prix_abo_e = st.number_input(
-                            "Abonnement mensuel (€)",
+                            LABEL_MONTHLY_SUB,
                             value=float(
                                 extracted_data.get("electricite", {})
                                 .get("tarifs", {})
@@ -170,7 +178,7 @@ def show():
                             key="date_ann_e_dual",
                         )
                         prix_kwh_e = st.number_input(
-                            "Prix kWh (€)",
+                            LABEL_PRICE_KWH,
                             value=float(
                                 extracted_data.get("electricite", {})
                                 .get("tarifs", {})
@@ -215,7 +223,7 @@ def show():
                             key="zone_g_dual",
                         )
                         prix_abo_g = st.number_input(
-                            "Abonnement mensuel (€)",
+                            LABEL_MONTHLY_SUB,
                             value=float(
                                 extracted_data.get("gaz", {})
                                 .get("tarifs", {})
@@ -239,7 +247,7 @@ def show():
                             key="date_ann_g_dual",
                         )
                         prix_kwh_g = st.number_input(
-                            "Prix kWh (€)",
+                            LABEL_PRICE_KWH,
                             value=float(
                                 extracted_data.get("gaz", {})
                                 .get("tarifs", {})
@@ -295,14 +303,14 @@ def show():
                     )
 
                     date_debut = st.date_input(
-                        "Date de début",
+                        LABEL_START_DATE,
                         value=datetime.strptime(
                             extracted_data.get("date_debut", datetime.now().strftime("%Y-%m-%d")),
                             "%Y-%m-%d",
                         ),
                     )
                     date_anniversaire = st.date_input(
-                        "Date anniversaire",
+                        LABEL_ANNIVERSARY_DATE,
                         value=datetime.strptime(
                             extracted_data.get(
                                 "date_anniversaire", datetime.now().strftime("%Y-%m-%d")
@@ -340,7 +348,7 @@ def show():
                 with col1:
                     provider = st.text_input("Assureur", value=extracted_data.get("assureur", ""))
                     numero_contrat = st.text_input(
-                        "Numéro de contrat", value=extracted_data.get("numero_contrat", "")
+                        LABEL_CONTRACT_NUMBER, value=extracted_data.get("numero_contrat", "")
                     )
 
                     st.markdown("**Bien assuré**")
@@ -382,7 +390,7 @@ def show():
                         ),
                     )
                     date_anniversaire = st.date_input(
-                        "Date anniversaire",
+                        LABEL_ANNIVERSARY_DATE,
                         value=datetime.strptime(
                             extracted_data.get(
                                 "date_anniversaire", datetime.now().strftime("%Y-%m-%d")
@@ -448,7 +456,7 @@ def show():
                 with col1:
                     provider = st.text_input("Assureur", value=extracted_data.get("assureur", ""))
                     numero_contrat = st.text_input(
-                        "Numéro de contrat", value=extracted_data.get("numero_contrat", "")
+                        LABEL_CONTRACT_NUMBER, value=extracted_data.get("numero_contrat", "")
                     )
 
                     st.markdown("**Bien assuré**")
@@ -506,7 +514,7 @@ def show():
                     def parse_date(date_str):
                         if not date_str:
                             return datetime.now()
-                        for fmt in ["%d/%m/%Y", "%Y-%m-%d"]:
+                        for fmt in [DATE_FORMAT, "%Y-%m-%d"]:
                             try:
                                 return datetime.strptime(date_str, fmt)
                             except ValueError:
@@ -517,7 +525,7 @@ def show():
                     date_anniv_val = parse_date(dates.get("date_anniversaire", ""))
 
                     date_effet = st.date_input("Date d'effet", value=date_effet_val)
-                    date_anniversaire = st.date_input("Date anniversaire", value=date_anniv_val)
+                    date_anniversaire = st.date_input(LABEL_ANNIVERSARY_DATE, value=date_anniv_val)
 
                 st.markdown("**Garanties incluses**")
                 garanties_list = extracted_data.get("garanties_incluses", [])
@@ -551,8 +559,8 @@ def show():
                     },
                     "franchises": {"franchise_generale": franchise},
                     "dates": {
-                        "date_debut": date_effet.strftime("%d/%m/%Y"),
-                        "date_anniversaire": date_anniversaire.strftime("%d/%m/%Y"),
+                        "date_debut": date_effet.strftime(DATE_FORMAT),
+                        "date_anniversaire": date_anniversaire.strftime(DATE_FORMAT),
                     },
                 }
 
@@ -586,14 +594,14 @@ def show():
 
                 with col2:
                     prix_abo = st.number_input(
-                        "Abonnement mensuel (€)",
+                        LABEL_MONTHLY_SUB,
                         value=float(tarifs_data.get("abonnement_mensuel_ttc") or 0),
                         min_value=0.0,
                         step=0.01,
                     )
 
                     prix_kwh_base = st.number_input(
-                        "Prix kWh TTC (€)",
+                        LABEL_PRICE_KWH,
                         value=float(tarifs_data.get("prix_kwh_ttc") or 0),
                         min_value=0.0,
                         step=0.001,
@@ -611,12 +619,12 @@ def show():
                         date_debut_val = datetime.now()
                     else:
                         try:
-                            date_debut_val = datetime.strptime(date_debut_str, "%d/%m/%Y")
+                            date_debut_val = datetime.strptime(date_debut_str, DATE_FORMAT)
                         except ValueError:
                             date_debut_val = datetime.now()
 
                     date_debut = st.date_input(
-                        "Date de début",
+                        LABEL_START_DATE,
                         value=date_debut_val,
                     )
 
@@ -625,12 +633,12 @@ def show():
                         date_anniv_val = datetime.now()
                     else:
                         try:
-                            date_anniv_val = datetime.strptime(date_anniv_str, "%d/%m/%Y")
+                            date_anniv_val = datetime.strptime(date_anniv_str, DATE_FORMAT)
                         except ValueError:
                             date_anniv_val = datetime.now()
 
                     date_anniversaire = st.date_input(
-                        "Date anniversaire",
+                        LABEL_ANNIVERSARY_DATE,
                         value=date_anniv_val,
                     )
 
@@ -686,7 +694,7 @@ def show():
 
                 with col2:
                     prix_abo = st.number_input(
-                        "Abonnement mensuel (€)",
+                        LABEL_MONTHLY_SUB,
                         value=float(tarifs_data.get("abonnement_mensuel_ttc") or 0),
                         min_value=0.0,
                         step=0.01,
@@ -710,12 +718,12 @@ def show():
                         date_debut_val = datetime.now()
                     else:
                         try:
-                            date_debut_val = datetime.strptime(date_debut_str, "%d/%m/%Y")
+                            date_debut_val = datetime.strptime(date_debut_str, DATE_FORMAT)
                         except ValueError:
                             date_debut_val = datetime.now()
 
                     date_debut = st.date_input(
-                        "Date de début",
+                        LABEL_START_DATE,
                         value=date_debut_val,
                     )
 
@@ -724,12 +732,12 @@ def show():
                         date_anniv_val = datetime.now()
                     else:
                         try:
-                            date_anniv_val = datetime.strptime(date_anniv_str, "%d/%m/%Y")
+                            date_anniv_val = datetime.strptime(date_anniv_str, DATE_FORMAT)
                         except ValueError:
                             date_anniv_val = datetime.now()
 
                     date_anniversaire = st.date_input(
-                        "Date anniversaire",
+                        LABEL_ANNIVERSARY_DATE,
                         value=date_anniv_val,
                     )
 

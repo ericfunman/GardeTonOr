@@ -5,7 +5,7 @@ import plotly.express as px
 
 from src.database import get_db
 from src.services import OpenAIService, PDFService, ContractService
-from src.config import CONTRACT_TYPES
+from src.config import CONTRACT_TYPES, LABEL_ECONOMY_YEAR, LABEL_TOTAL_ECONOMY_YEAR
 
 
 def show():
@@ -157,7 +157,7 @@ def show():
                     "Date": comp.created_at.strftime("%d/%m/%Y %H:%M"),
                     "Type": type_label,
                     "Contrat": f"{comp.contract.provider}",
-                    "Économie (€/an)": f"{economie:.2f}",
+                    LABEL_ECONOMY_YEAR: f"{economie:.2f}",
                     "Recommandation": recommandation,
                 }
             )
@@ -192,7 +192,7 @@ def show():
                     {
                         "Date": comp.created_at,
                         "Contrat": comp.contract.provider,
-                        "Économie (€/an)": economie,
+                        LABEL_ECONOMY_YEAR: economie,
                         "Taille": abs(economie) + 5,  # Taille minimale pour visibilité
                         "Type": "Marché"
                         if comp.comparison_type == "market_analysis"
@@ -206,13 +206,13 @@ def show():
             fig = px.scatter(
                 df_chart,
                 x="Date",
-                y="Économie (€/an)",
+                y=LABEL_ECONOMY_YEAR,
                 color="Contrat",
                 symbol="Type",
                 title="Économies potentielles par analyse",
                 size="Taille",
                 size_max=20,
-                hover_data=["Type", "Économie (€/an)"],
+                hover_data=["Type", LABEL_ECONOMY_YEAR],
             )
 
             fig.add_hline(y=0, line_dash="dash", line_color="gray", annotation_text="Seuil")
@@ -241,7 +241,7 @@ def show():
         if savings_by_contract:
             df_savings = pd.DataFrame(
                 [
-                    {"Contrat": k, "Économie totale (€/an)": v}
+                    {"Contrat": k, LABEL_TOTAL_ECONOMY_YEAR: v}
                     for k, v in savings_by_contract.items()
                 ]
             )
@@ -249,9 +249,9 @@ def show():
             fig2 = px.bar(
                 df_savings,
                 x="Contrat",
-                y="Économie totale (€/an)",
+                y=LABEL_TOTAL_ECONOMY_YEAR,
                 title="Économies potentielles cumulées par contrat",
-                color="Économie totale (€/an)",
+                color=LABEL_TOTAL_ECONOMY_YEAR,
                 color_continuous_scale="RdYlGn",
             )
 
