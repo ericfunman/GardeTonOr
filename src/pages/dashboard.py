@@ -98,9 +98,14 @@ def show():
         with col_header:
             st.markdown("### 📋 Tous vos contrats")
         with col_btn:
-            if st.button("➕ Ajouter un contrat", key="add_contract_top"):
+            def _go_to_add_contract():
                 st.session_state["navigation"] = "➕ Ajouter un contrat"
-                st.rerun()
+
+            st.button(
+                "➕ Ajouter un contrat",
+                key="add_contract_top",
+                on_click=_go_to_add_contract,
+            )
 
         if not contracts:
             st.info("Aucun contrat enregistré. Commencez par ajouter un contrat !")
