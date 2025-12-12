@@ -87,7 +87,7 @@ def show():
                         st.session_state["compare_contract_id"] = contract.id
                         st.session_state["navigation"] = "⚖️ Comparer"
                         st.rerun()
-                    
+
                     if st.button("🗑️ Supprimer", key=f"delete_{contract.id}"):
                         if contract_service.delete_contract(contract.id):
                             st.success("Contrat supprimé !")
@@ -106,6 +106,7 @@ def show():
         with col_header:
             st.markdown("### 📋 Tous vos contrats")
         with col_btn:
+
             def _go_to_add_contract():
                 st.session_state["navigation"] = "📥 Importer un contrat"
 
@@ -151,9 +152,7 @@ def show():
                         st.markdown(f"💰 **{cost}**")
 
                     with col3:
-                        st.markdown(
-                            f"📅 {contract.anniversary_date.strftime('%d/%m/%Y')}"
-                        )
+                        st.markdown(f"📅 {contract.anniversary_date.strftime('%d/%m/%Y')}")
 
                     with col4:
                         if st.button("🔍 Comparer", key=f"comp_list_{contract.id}"):

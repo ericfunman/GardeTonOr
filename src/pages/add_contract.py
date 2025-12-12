@@ -108,114 +108,149 @@ def show():
         with st.form("validate_contract"):
             if contract_type == "electricite_gaz":
                 tab_elec, tab_gaz = st.tabs(["⚡ Électricité", "🔥 Gaz"])
-                
+
                 # --- ELECTRICITE ---
                 with tab_elec:
                     st.subheader("Contrat Électricité")
                     col1_e, col2_e = st.columns(2)
                     with col1_e:
                         provider_e = st.text_input(
-                            "Fournisseur (Elec)", 
+                            "Fournisseur (Elec)",
                             value=extracted_data.get("fournisseur", ""),
-                            key="prov_e"
+                            key="prov_e",
                         )
                         pdl = st.text_input(
                             "PDL (Point de Livraison)",
                             value=extracted_data.get("electricite", {}).get("pdl", ""),
-                            key="pdl_dual"
+                            key="pdl_dual",
                         )
                         puissance = st.number_input(
                             "Puissance (kVA)",
-                            value=float(extracted_data.get("electricite", {}).get("puissance_souscrite_kva", 0) or 0),
+                            value=float(
+                                extracted_data.get("electricite", {}).get(
+                                    "puissance_souscrite_kva", 0
+                                )
+                                or 0
+                            ),
                             min_value=0.0,
-                            key="puis_dual"
+                            key="puis_dual",
                         )
                         prix_abo_e = st.number_input(
                             "Abonnement mensuel (€)",
-                            value=float(extracted_data.get("electricite", {}).get("tarifs", {}).get("abonnement_mensuel_ttc", 0) or 0),
+                            value=float(
+                                extracted_data.get("electricite", {})
+                                .get("tarifs", {})
+                                .get("abonnement_mensuel_ttc", 0)
+                                or 0
+                            ),
                             min_value=0.0,
                             step=0.01,
-                            key="abo_e_dual"
+                            key="abo_e_dual",
                         )
 
                     with col2_e:
                         date_debut_e = st.date_input(
                             "Date de début (Elec)",
-                            value=datetime.now(), # TODO: Parse date
-                            key="date_deb_e_dual"
+                            value=datetime.now(),  # TODO: Parse date
+                            key="date_deb_e_dual",
                         )
                         date_anniv_e = st.date_input(
                             "Date anniversaire (Elec)",
-                            value=datetime.now(), # TODO: Parse date
-                            key="date_ann_e_dual"
+                            value=datetime.now(),  # TODO: Parse date
+                            key="date_ann_e_dual",
                         )
                         prix_kwh_e = st.number_input(
                             "Prix kWh (€)",
-                            value=float(extracted_data.get("electricite", {}).get("tarifs", {}).get("prix_kwh_ttc", 0) or 0),
+                            value=float(
+                                extracted_data.get("electricite", {})
+                                .get("tarifs", {})
+                                .get("prix_kwh_ttc", 0)
+                                or 0
+                            ),
                             min_value=0.0,
                             step=0.0001,
                             format="%.4f",
-                            key="kwh_e_dual"
+                            key="kwh_e_dual",
                         )
                         conso_annuelle_e = st.number_input(
                             "Conso annuelle estimée (kWh)",
-                            value=float(extracted_data.get("electricite", {}).get("consommation_estimee_annuelle_kwh", 0) or 0),
+                            value=float(
+                                extracted_data.get("electricite", {}).get(
+                                    "consommation_estimee_annuelle_kwh", 0
+                                )
+                                or 0
+                            ),
                             min_value=0.0,
-                            key="conso_e_dual"
+                            key="conso_e_dual",
                         )
-                        
+
                 # --- GAZ ---
                 with tab_gaz:
                     st.subheader("Contrat Gaz")
                     col1_g, col2_g = st.columns(2)
                     with col1_g:
                         provider_g = st.text_input(
-                            "Fournisseur (Gaz)", 
+                            "Fournisseur (Gaz)",
                             value=extracted_data.get("fournisseur", ""),
-                            key="prov_g"
+                            key="prov_g",
                         )
                         pce = st.text_input(
                             "PCE (Point Comptage)",
                             value=extracted_data.get("gaz", {}).get("pce", ""),
-                            key="pce_dual"
+                            key="pce_dual",
                         )
                         zone_gaz = st.text_input(
                             "Zone tarifaire",
                             value=str(extracted_data.get("gaz", {}).get("zone_tarifaire", "")),
-                            key="zone_g_dual"
+                            key="zone_g_dual",
                         )
                         prix_abo_g = st.number_input(
                             "Abonnement mensuel (€)",
-                            value=float(extracted_data.get("gaz", {}).get("tarifs", {}).get("abonnement_mensuel_ttc", 0) or 0),
+                            value=float(
+                                extracted_data.get("gaz", {})
+                                .get("tarifs", {})
+                                .get("abonnement_mensuel_ttc", 0)
+                                or 0
+                            ),
                             min_value=0.0,
                             step=0.01,
-                            key="abo_g_dual"
+                            key="abo_g_dual",
                         )
 
                     with col2_g:
                         date_debut_g = st.date_input(
                             "Date de début (Gaz)",
-                            value=datetime.now(), # TODO: Parse date
-                            key="date_deb_g_dual"
+                            value=datetime.now(),  # TODO: Parse date
+                            key="date_deb_g_dual",
                         )
                         date_anniv_g = st.date_input(
                             "Date anniversaire (Gaz)",
-                            value=datetime.now(), # TODO: Parse date
-                            key="date_ann_g_dual"
+                            value=datetime.now(),  # TODO: Parse date
+                            key="date_ann_g_dual",
                         )
                         prix_kwh_g = st.number_input(
                             "Prix kWh (€)",
-                            value=float(extracted_data.get("gaz", {}).get("tarifs", {}).get("prix_kwh_ttc", 0) or 0),
+                            value=float(
+                                extracted_data.get("gaz", {})
+                                .get("tarifs", {})
+                                .get("prix_kwh_ttc", 0)
+                                or 0
+                            ),
                             min_value=0.0,
                             step=0.0001,
                             format="%.4f",
-                            key="kwh_g_dual"
+                            key="kwh_g_dual",
                         )
                         conso_annuelle_g = st.number_input(
                             "Conso annuelle estimée (kWh)",
-                            value=float(extracted_data.get("gaz", {}).get("consommation_estimee_annuelle_kwh", 0) or 0),
+                            value=float(
+                                extracted_data.get("gaz", {}).get(
+                                    "consommation_estimee_annuelle_kwh", 0
+                                )
+                                or 0
+                            ),
                             min_value=0.0,
-                            key="conso_g_dual"
+                            key="conso_g_dual",
                         )
 
             if contract_type == "telephone":
@@ -683,9 +718,7 @@ def show():
                                 filename=st.session_state["filename"],
                             )
 
-                            st.success(
-                                f"✅ Contrat enregistré avec succès ! (ID: {contract.id})"
-                            )
+                            st.success(f"✅ Contrat enregistré avec succès ! (ID: {contract.id})")
 
                         # Nettoyer la session
                         for key in [

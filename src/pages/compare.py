@@ -32,7 +32,7 @@ def show():
         # Préremplir si vient du dashboard
         default_index = 0
         contract_ids = [c.id for c in contracts]
-        
+
         if "compare_contract_id" in st.session_state:
             try:
                 default_index = contract_ids.index(st.session_state["compare_contract_id"])
@@ -56,13 +56,12 @@ def show():
         if selected_contract_id:
             # Récupérer l'objet frais depuis la session actuelle
             selected_contract = contract_service.get_contract_by_id(selected_contract_id)
-            
+
             if selected_contract:
                 # Afficher les détails du contrat
                 contract_data = selected_contract.contract_data
                 contract_id = selected_contract.id
-                contract_type = selected_contract.contract_type
-                
+
                 with st.expander("📄 Détails du contrat", expanded=False):
                     st.json(contract_data)
 
