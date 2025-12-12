@@ -45,7 +45,7 @@ class TestAddContractPage:
         at.session_state["pdf_bytes"] = b"fake pdf content"
 
         with patch("src.database.get_db") as mock_get_db:
-            mock_get_db.return_value = mock_get_db_context(db_session)
+            mock_get_db.side_effect = lambda: mock_get_db_context(db_session)
             at.run(timeout=10)
 
         assert not at.exception
@@ -83,7 +83,7 @@ class TestAddContractPage:
         at.session_state["pdf_bytes"] = b"fake pdf content"
 
         with patch("src.database.get_db") as mock_get_db:
-            mock_get_db.return_value = mock_get_db_context(db_session)
+            mock_get_db.side_effect = lambda: mock_get_db_context(db_session)
 
             at.run(timeout=10)
 
@@ -100,7 +100,7 @@ class TestComparePage:
         at = AppTest.from_file("src/pages/compare.py")
 
         with patch("src.database.get_db") as mock_get_db:
-            mock_get_db.return_value = mock_get_db_context(db_session)
+            mock_get_db.side_effect = lambda: mock_get_db_context(db_session)
             at.run(timeout=10)
 
         assert not at.exception
@@ -124,7 +124,7 @@ class TestComparePage:
         at = AppTest.from_file("src/pages/compare.py")
 
         with patch("src.database.get_db") as mock_get_db:
-            mock_get_db.return_value = mock_get_db_context(db_session)
+            mock_get_db.side_effect = lambda: mock_get_db_context(db_session)
             at.run(timeout=10)
 
         # Vérifier qu'on a un selectbox pour choisir le contrat
@@ -139,7 +139,7 @@ class TestHistoryPage:
         at = AppTest.from_file("src/pages/history.py")
 
         with patch("src.database.get_db") as mock_get_db:
-            mock_get_db.return_value = mock_get_db_context(db_session)
+            mock_get_db.side_effect = lambda: mock_get_db_context(db_session)
             at.run(timeout=10)
 
         assert not at.exception
@@ -174,7 +174,7 @@ class TestHistoryPage:
         at = AppTest.from_file("src/pages/history.py")
 
         with patch("src.database.get_db") as mock_get_db:
-            mock_get_db.return_value = mock_get_db_context(db_session)
+            mock_get_db.side_effect = lambda: mock_get_db_context(db_session)
             at.run(timeout=10)
 
         # Vérifier qu'on affiche les métriques
@@ -242,7 +242,7 @@ class TestAddContractPageExtended(TestAddContractPage):
         at.session_state["pdf_bytes"] = b"fake pdf"
 
         with patch("src.database.get_db") as mock_get_db:
-            mock_get_db.return_value = mock_get_db_context(db_session)
+            mock_get_db.side_effect = lambda: mock_get_db_context(db_session)
             at.run(timeout=10)
 
             # Vérifier qu'on a des onglets ou des sections pour Elec et Gaz
@@ -288,7 +288,7 @@ class TestAddContractPageExtended(TestAddContractPage):
         at.session_state["pdf_bytes"] = b"fake pdf"
 
         with patch("src.database.get_db") as mock_get_db:
-            mock_get_db.return_value = mock_get_db_context(db_session)
+            mock_get_db.side_effect = lambda: mock_get_db_context(db_session)
             at.run(timeout=10)
 
             assert len(at.text_input) > 0

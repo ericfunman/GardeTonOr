@@ -322,7 +322,7 @@ class TestComparePageDirect:
         }
 
         # Mock streamlit
-        with patch("src.pages.compare.st") as mock_st:
+        with patch("src.pages.compare_logic.st") as mock_st:
             # Configure columns to return dynamic number of mocks
             def side_effect_columns(spec):
                 if isinstance(spec, int):
@@ -367,7 +367,7 @@ class TestComparePageDirect:
             "prix_abonnement": 15,
         }
 
-        with patch("src.pages.compare.st") as mock_st:
+        with patch("src.pages.compare_logic.st") as mock_st:
 
             def side_effect_columns(spec):
                 if isinstance(spec, int):
@@ -396,7 +396,7 @@ class TestComparePageDirect:
             },
         }
 
-        with patch("src.pages.compare.st") as mock_st:
+        with patch("src.pages.compare_logic.st") as mock_st:
 
             def side_effect_columns(spec):
                 if isinstance(spec, int):

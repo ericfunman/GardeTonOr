@@ -16,9 +16,10 @@ class TestCompareIntegration(unittest.TestCase):
     @patch("src.pages.compare.OpenAIService")
     @patch("src.pages.compare.PDFService")
     @patch("src.pages.compare.ContractService")
+    @patch("src.pages.compare_logic.st")
     @patch("src.pages.compare.st")
     def test_display_comparison_table_telephone(
-        self, mock_st, mock_contract_service_cls, mock_pdf_cls, mock_openai_cls, mock_get_db
+        self, mock_st, mock_st_logic, mock_contract_service_cls, mock_pdf_cls, mock_openai_cls, mock_get_db
     ):
         # Setup mocks
         mock_contract_service = mock_contract_service_cls.return_value
@@ -63,25 +64,22 @@ class TestCompareIntegration(unittest.TestCase):
             return [MagicMock() for _ in range(num_columns)]
 
         mock_st.columns.side_effect = columns_side_effect
+        mock_st_logic.columns.side_effect = columns_side_effect
 
         # Execute
         compare.show()
 
         # Verify
-        # Check if dataframe was displayed (it's used for the table)
-        # Note: The code might use st.table or st.dataframe or st.columns
-        # Looking at the code, it constructs 'rows' list and then creates a DataFrame
-        # df = pd.DataFrame(rows, columns=["Caractéristique", "Mon Contrat", "Meilleure Offre"])
-        # st.table(df)
-        mock_st.metric.assert_called()
+        mock_st_logic.metric.assert_called()
 
     @patch("src.pages.compare.get_db")
     @patch("src.pages.compare.OpenAIService")
     @patch("src.pages.compare.PDFService")
     @patch("src.pages.compare.ContractService")
+    @patch("src.pages.compare_logic.st")
     @patch("src.pages.compare.st")
     def test_display_comparison_table_pno(
-        self, mock_st, mock_contract_service_cls, mock_pdf_cls, mock_openai_cls, mock_get_db
+        self, mock_st, mock_st_logic, mock_contract_service_cls, mock_pdf_cls, mock_openai_cls, mock_get_db
     ):
         mock_contract_service = mock_contract_service_cls.return_value
 
@@ -116,18 +114,20 @@ class TestCompareIntegration(unittest.TestCase):
             return [MagicMock() for _ in range(num_columns)]
 
         mock_st.columns.side_effect = columns_side_effect
+        mock_st_logic.columns.side_effect = columns_side_effect
 
         compare.show()
 
-        mock_st.metric.assert_called()
+        mock_st_logic.metric.assert_called()
 
     @patch("src.pages.compare.get_db")
     @patch("src.pages.compare.OpenAIService")
     @patch("src.pages.compare.PDFService")
     @patch("src.pages.compare.ContractService")
+    @patch("src.pages.compare_logic.st")
     @patch("src.pages.compare.st")
     def test_display_comparison_table_habitation(
-        self, mock_st, mock_contract_service_cls, mock_pdf_cls, mock_openai_cls, mock_get_db
+        self, mock_st, mock_st_logic, mock_contract_service_cls, mock_pdf_cls, mock_openai_cls, mock_get_db
     ):
         mock_contract_service = mock_contract_service_cls.return_value
 
@@ -162,7 +162,8 @@ class TestCompareIntegration(unittest.TestCase):
             return [MagicMock() for _ in range(num_columns)]
 
         mock_st.columns.side_effect = columns_side_effect
+        mock_st_logic.columns.side_effect = columns_side_effect
 
         compare.show()
 
-        mock_st.metric.assert_called()
+        mock_st_logic.metric.assert_called()

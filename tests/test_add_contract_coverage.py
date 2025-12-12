@@ -127,4 +127,4 @@ class TestAddContractCoverage(unittest.TestCase):
 
         # Verify
         self.assertEqual(mock_service.create_contract.call_count, 2)
-        mock_st.success.assert_called_with("✅ 2 Contrats enregistrés avec succès ! (IDs: 1, 2)")
+        mock_st.success.assert_called_with("✅ Contrat(s) enregistré(s) avec succès !")

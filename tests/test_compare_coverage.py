@@ -65,13 +65,13 @@ class TestCompareCoverage(unittest.TestCase):
         # The selectbox should be called (with default index 0 probably, or whatever logic handles it)
         mock_st.selectbox.assert_called()
 
-    @patch("src.pages.compare.st")
+    @patch("src.pages.compare_logic.st")
     def test_display_market_analysis_price_types(self, mock_st):
         # Test with cout_annuel_estime (e.g. electricity)
         comparison_elec = MagicMock()
         comparison_elec.comparison_result = {
             "analyse": {
-                "offres_concurrentes": [
+                "offres_similaires": [
                     {
                         "fournisseur": "EDF",
                         "cout_annuel_estime": 1200,
@@ -84,8 +84,12 @@ class TestCompareCoverage(unittest.TestCase):
         }
 
         # Mock columns
-        def columns_side_effect(num_columns):
-            return [MagicMock() for _ in range(num_columns)]
+        def columns_side_effect(spec):
+            if isinstance(spec, int):
+                count = spec
+            else:
+                count = len(spec)
+            return [MagicMock() for _ in range(count)]
 
         mock_st.columns.side_effect = columns_side_effect
 

@@ -47,7 +47,7 @@ def test_dashboard_page_loads(db_session, sample_contract_data_telephone):
     # avant de lancer le script.
 
     with patch("src.database.get_db") as mock_get_db:
-        mock_get_db.return_value = mock_get_db_context(db_session)
+        mock_get_db.side_effect = lambda: mock_get_db_context(db_session)
         at.run(timeout=10)
 
     # Vérifier qu'il n'y a pas d'erreur
@@ -93,7 +93,7 @@ def test_dashboard_delete_contract(db_session, sample_contract_data_telephone):
     at = AppTest.from_file("src/pages/dashboard.py")
 
     with patch("src.database.get_db") as mock_get_db:
-        mock_get_db.return_value = mock_get_db_context(db_session)
+        mock_get_db.side_effect = lambda: mock_get_db_context(db_session)
         at.run(timeout=10)
 
         # Vérifier qu'on a des boutons (pour supprimer/voir)
@@ -137,7 +137,7 @@ def test_compare_page_loads(db_session):
     at = AppTest.from_file("src/pages/compare.py")
 
     with patch("src.database.get_db") as mock_get_db:
-        mock_get_db.return_value = mock_get_db_context(db_session)
+        mock_get_db.side_effect = lambda: mock_get_db_context(db_session)
         at.run(timeout=10)
 
     assert not at.exception
@@ -152,7 +152,7 @@ def test_add_contract_extraction(db_session, sample_contract_data_telephone):
     with patch("src.database.get_db") as mock_get_db, patch(
         "src.services.ContractService.extract_and_create_contract"
     ) as mock_extract:
-        mock_get_db.return_value = mock_get_db_context(db_session)
+        mock_get_db.side_effect = lambda: mock_get_db_context(db_session)
 
         # Setup mock return
         mock_extract.return_value = (sample_contract_data_telephone, "Raw text")
@@ -175,7 +175,7 @@ def test_history_page_loads(db_session):
     at = AppTest.from_file("src/pages/history.py")
 
     with patch("src.database.get_db") as mock_get_db:
-        mock_get_db.return_value = mock_get_db_context(db_session)
+        mock_get_db.side_effect = lambda: mock_get_db_context(db_session)
         at.run(timeout=10)
 
     assert not at.exception
