@@ -147,7 +147,7 @@ def show():
                     market_analysis = {}
 
                 recommandation = (
-                    comp.comparison_result.get("recommandation") 
+                    comp.comparison_result.get("recommandation")
                     or market_analysis.get("recommandation", "")
                 )[:50]
 

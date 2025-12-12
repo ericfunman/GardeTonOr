@@ -1,10 +1,10 @@
 """Tests pour la page de visualisation des contrats."""
-import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 from streamlit.testing.v1 import AppTest
 from contextlib import contextmanager
 from datetime import datetime
 from src.database.models import Contract
+
 
 @contextmanager
 def mock_get_db_context(session):
@@ -39,7 +39,7 @@ class TestViewContractsPage:
         db_session.commit()
 
         at = AppTest.from_file("src/pages/view_contracts.py")
-        
+
         with patch("src.database.get_db") as mock_get_db:
             mock_get_db.side_effect = lambda: mock_get_db_context(db_session)
             at.run(timeout=10)
@@ -69,15 +69,15 @@ class TestViewContractsPage:
         db_session.commit()
 
         at = AppTest.from_file("src/pages/view_contracts.py")
-        
+
         with patch("src.database.get_db") as mock_get_db:
             mock_get_db.side_effect = lambda: mock_get_db_context(db_session)
             at.run(timeout=10)
-            
+
             # Sélectionner le contrat dans la selectbox
             if at.selectbox:
                 at.selectbox[0].set_value(contract.id).run()
-                
+
                 assert not at.exception
                 # Vérifier que TotalEnergies apparaît quelque part (titre, markdown, json, metric)
                 found = False
@@ -85,19 +85,19 @@ class TestViewContractsPage:
                     if "TotalEnergies" in md.value:
                         found = True
                         break
-                
+
                 if not found:
                     # Vérifier dans les metrics
                     for metric in at.metric:
                         if "TotalEnergies" in metric.label or "TotalEnergies" in str(metric.value):
                             found = True
                             break
-                            
+
                 if not found and at.json:
                     # Vérifier dans le JSON
                     if "TotalEnergies" in str(at.json[0].value):
                         found = True
-                        
+
                 # Si toujours pas trouvé, vérifier le sous-titre
                 if not found:
                     for subheader in at.subheader:
@@ -127,11 +127,11 @@ class TestViewContractsPage:
         db_session.commit()
 
         at = AppTest.from_file("src/pages/view_contracts.py")
-        
+
         with patch("src.database.get_db") as mock_get_db:
             mock_get_db.side_effect = lambda: mock_get_db_context(db_session)
             at.run(timeout=10)
-            
+
             if at.selectbox:
                 at.selectbox[0].set_value(contract.id).run()
                 assert not at.exception
@@ -146,11 +146,11 @@ class TestViewContractsPage:
     def test_view_contracts_no_contracts(self, db_session):
         """Test l'affichage quand il n'y a aucun contrat."""
         at = AppTest.from_file("src/pages/view_contracts.py")
-        
+
         with patch("src.database.get_db") as mock_get_db:
             mock_get_db.side_effect = lambda: mock_get_db_context(db_session)
             at.run(timeout=10)
-            
+
             assert "Aucun contrat enregistré" in at.info[0].value
 
     def test_view_contracts_preselection(self, db_session):
@@ -169,11 +169,11 @@ class TestViewContractsPage:
 
         at = AppTest.from_file("src/pages/view_contracts.py")
         at.session_state["view_contract_id"] = contract.id
-        
+
         with patch("src.database.get_db") as mock_get_db:
             mock_get_db.side_effect = lambda: mock_get_db_context(db_session)
             at.run(timeout=10)
-            
+
             # Vérifier que le contrat est sélectionné (Engie affiché)
             # Le selectbox devrait avoir l'index correct
             # On vérifie si Engie est dans les options du selectbox
@@ -194,12 +194,12 @@ class TestViewContractsPage:
         db_session.commit()
 
         at = AppTest.from_file("src/pages/view_contracts.py")
-        at.session_state["view_contract_id"] = 99999 # ID inexistant
-        
+        at.session_state["view_contract_id"] = 99999  # ID inexistant
+
         with patch("src.database.get_db") as mock_get_db:
             mock_get_db.side_effect = lambda: mock_get_db_context(db_session)
             at.run(timeout=10)
-            
+
             assert not at.exception
             # Devrait charger par défaut (index 0) sans erreur
             assert "Engie" in str(at.selectbox[0].options)
@@ -220,21 +220,21 @@ class TestViewContractsPage:
         db_session.commit()
 
         at = AppTest.from_file("src/pages/view_contracts.py")
-        
+
         with patch("src.database.get_db") as mock_get_db, \
              patch("src.services.ContractService.get_contract_by_id") as mock_get_contract:
-            
+
             mock_get_db.side_effect = lambda: mock_get_db_context(db_session)
             # On laisse get_all_contracts fonctionner normalement (via le vrai service ou mocké si besoin)
             # Mais on force get_contract_by_id à retourner None
             mock_get_contract.return_value = None
-            
+
             at.run(timeout=10)
-            
+
             if at.selectbox:
                 at.selectbox[0].set_value(contract.id).run()
                 assert "Contrat introuvable" in at.error[0].value
-                
+
     def test_view_contracts_assurance_habitation(self, db_session):
         """Test l'affichage d'un contrat d'assurance habitation."""
         contract = Contract(
@@ -260,11 +260,11 @@ class TestViewContractsPage:
         db_session.commit()
 
         at = AppTest.from_file("src/pages/view_contracts.py")
-        
+
         with patch("src.database.get_db") as mock_get_db:
             mock_get_db.side_effect = lambda: mock_get_db_context(db_session)
             at.run(timeout=10)
-            
+
             if at.selectbox:
                 at.selectbox[0].set_value(contract.id).run()
                 assert not at.exception
@@ -291,11 +291,11 @@ class TestViewContractsPage:
         db_session.commit()
 
         at = AppTest.from_file("src/pages/view_contracts.py")
-        
+
         with patch("src.database.get_db") as mock_get_db:
             mock_get_db.side_effect = lambda: mock_get_db_context(db_session)
             at.run(timeout=10)
-            
+
             if at.selectbox:
                 at.selectbox[0].set_value(contract.id).run()
                 assert not at.exception
@@ -321,11 +321,11 @@ class TestViewContractsPage:
         db_session.commit()
 
         at = AppTest.from_file("src/pages/view_contracts.py")
-        
+
         with patch("src.database.get_db") as mock_get_db:
             mock_get_db.side_effect = lambda: mock_get_db_context(db_session)
             at.run(timeout=10)
-            
+
             if at.selectbox:
                 at.selectbox[0].set_value(contract.id).run()
                 assert not at.exception

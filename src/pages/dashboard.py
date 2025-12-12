@@ -93,9 +93,9 @@ def show():
 
                 with col3:
                     st.button(
-                        "🔍 Comparer", 
-                        key=f"compare_{contract.id}", 
-                        on_click=go_to_compare, 
+                        "🔍 Comparer",
+                        key=f"compare_{contract.id}",
+                        on_click=go_to_compare,
                         args=(contract.id,)
                     )
 
@@ -182,8 +182,8 @@ def show():
 
                     with col5:
                         st.button(
-                            "🔍", 
-                            key=f"comp_list_{contract.id}", 
+                            "🔍",
+                            key=f"comp_list_{contract.id}",
                             help="Comparer",
                             on_click=go_to_compare,
                             args=(contract.id,)
