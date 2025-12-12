@@ -1,4 +1,3 @@
-import os
 import json
 from pathlib import Path
 from dotenv import load_dotenv
@@ -6,8 +5,8 @@ from dotenv import load_dotenv
 # Force reload .env to override any dummy keys in environment
 load_dotenv(override=True)
 
-from src.services.pdf_service import PDFService
-from src.services.openai_service import OpenAIService
+from src.services.pdf_service import PDFService  # noqa: E402
+from src.services.openai_service import OpenAIService  # noqa: E402
 
 
 def test_extraction():

@@ -3,9 +3,9 @@ import sys
 
 sys.path.insert(0, "src")
 
-from services.pdf_service import PDFService
-from services.openai_service import OpenAIService
-from config import OPENAI_API_KEY
+from services.pdf_service import PDFService  # noqa: E402
+from services.openai_service import OpenAIService  # noqa: E402
+from config import OPENAI_API_KEY  # noqa: E402
 
 # Extraire le texte
 pdf_service = PDFService()

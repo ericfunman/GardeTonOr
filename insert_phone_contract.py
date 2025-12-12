@@ -56,7 +56,7 @@ def insert_phone_contract():
         db.add(contract)
         pass
 
-    print(f"Contrat téléphone ajouté avec succès !")
+    print("Contrat téléphone ajouté avec succès !")
 
 
 if __name__ == "__main__":

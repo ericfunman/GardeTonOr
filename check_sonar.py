@@ -2,7 +2,6 @@ import requests
 import argparse
 import os
 import sys
-import json
 
 # Configuration
 SONAR_HOST = "https://sonarcloud.io"

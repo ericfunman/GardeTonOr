@@ -63,7 +63,7 @@ Réponds UNIQUEMENT avec un JSON valide contenant ces champs:
     "conditions_resiliation": "texte des conditions"
 }
 
-IMPORTANT: 
+IMPORTANT:
 - Extrais TOUTES les informations disponibles
 - Mets null pour les champs non trouvés
 - Vérifie bien les prix et la puissance

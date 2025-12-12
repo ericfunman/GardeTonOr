@@ -67,7 +67,7 @@ def insert_contract():
         # get_db commits on exit.
         pass
 
-    print(f"Contrat ajouté avec succès !")
+    print("Contrat ajouté avec succès !")
 
 
 if __name__ == "__main__":

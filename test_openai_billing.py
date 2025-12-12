@@ -29,12 +29,12 @@ try:
 
     print(f"Status Code: {response.status_code}")
     print(f"Headers: {dict(response.headers)}")
-    print(f"\nRéponse brute:")
+    print("\nRéponse brute:")
     print(response.text)
 
     if response.status_code == 200:
         data = response.json()
-        print(f"\nJSON parsé:")
+        print("\nJSON parsé:")
         print(json.dumps(data, indent=2))
 
         if "total_available" in data:
@@ -61,12 +61,12 @@ try:
     )
 
     print(f"Status Code: {response.status_code}")
-    print(f"\nRéponse brute:")
+    print("\nRéponse brute:")
     print(response.text[:500])
 
     if response.status_code == 200:
         data = response.json()
-        print(f"\nJSON parsé (premiers éléments):")
+        print("\nJSON parsé (premiers éléments):")
         print(json.dumps(data, indent=2)[:500])
     else:
         print(f"\n❌ Erreur HTTP {response.status_code}")
@@ -87,12 +87,12 @@ try:
     )
 
     print(f"Status Code: {response.status_code}")
-    print(f"\nRéponse brute:")
+    print("\nRéponse brute:")
     print(response.text)
 
     if response.status_code == 200:
         data = response.json()
-        print(f"\nJSON parsé:")
+        print("\nJSON parsé:")
         print(json.dumps(data, indent=2))
     else:
         print(f"\n❌ Erreur HTTP {response.status_code}")

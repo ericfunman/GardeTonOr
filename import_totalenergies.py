@@ -2,13 +2,12 @@
 Script pour importer le contrat TotalEnergies dans la base de données
 """
 import sys
+from datetime import datetime
 
 sys.path.insert(0, "src")
 
-from datetime import datetime
-from database.database import SessionLocal
-from database.models import Contract
-import json
+from database.database import SessionLocal  # noqa: E402
+from database.models import Contract  # noqa: E402
 
 # Données extraites par ChatGPT
 totalenergies_data = {

@@ -1,5 +1,4 @@
 import os
-import re
 
 files = [
     r"c:\Users\lapin\OneDrive\Documents\Developpement\GardeTonOr\tests\test_openai_service_extended.py",

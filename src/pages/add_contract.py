@@ -220,7 +220,8 @@ def show():
 
                             contract = contract_service.create_contract(
                                 contract_type=final_type,
-                                provider=validated_data.get("fournisseur") or validated_data.get("assureur"),
+                                provider=validated_data.get("fournisseur")
+                                or validated_data.get("assureur"),
                                 start_date=datetime.strptime(
                                     validated_data.get("date_debut")
                                     or validated_data.get("date_effet"),

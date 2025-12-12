@@ -8,9 +8,9 @@ def debug_prompts():
     types_to_check = ["electricite", "gaz"]
 
     for c_type in types_to_check:
-        print(f"\n{'='*50}")
+        print(f"\n{'=' * 50}")
         print(f"DEBUG PROMPT FOR: {c_type.upper()}")
-        print(f"{'='*50}\n")
+        print(f"{'=' * 50}\n")
 
         # Get schema
         schema = service._get_contract_schema(c_type)
