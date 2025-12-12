@@ -76,10 +76,148 @@ def show():
         with st.expander("🔍 Voir les données brutes (Debug)", expanded=False):
             st.json(extracted_data)
 
+        # Logique de détection automatique
+        if contract_type == "auto":
+            has_elec = extracted_data.get("electricite") is not None and (
+                extracted_data.get("electricite", {}).get("pdl")
+                or extracted_data.get("electricite", {}).get("matricule_compteur")
+            )
+            has_gaz = extracted_data.get("gaz") is not None and (
+                extracted_data.get("gaz", {}).get("pce")
+                or extracted_data.get("gaz", {}).get("matricule_compteur")
+            )
+
+            if has_elec and has_gaz:
+                st.success("✨ Deux contrats détectés : Électricité et Gaz")
+                contract_type = "electricite_gaz"
+            elif has_elec:
+                st.success("✨ Contrat d'électricité détecté")
+                contract_type = "electricite"
+            elif has_gaz:
+                st.success("✨ Contrat de gaz détecté")
+                contract_type = "gaz"
+            else:
+                st.warning(
+                    "⚠️ Impossible de déterminer le type précis. Affichage par défaut (Électricité)."
+                )
+                contract_type = "electricite"
+
         st.info("Vérifiez et modifiez si nécessaire les données extraites par l'IA")
 
         # Formulaire de validation selon le type de contrat
         with st.form("validate_contract"):
+            if contract_type == "electricite_gaz":
+                tab_elec, tab_gaz = st.tabs(["⚡ Électricité", "🔥 Gaz"])
+                
+                # --- ELECTRICITE ---
+                with tab_elec:
+                    st.subheader("Contrat Électricité")
+                    col1_e, col2_e = st.columns(2)
+                    with col1_e:
+                        provider_e = st.text_input(
+                            "Fournisseur (Elec)", 
+                            value=extracted_data.get("fournisseur", ""),
+                            key="prov_e"
+                        )
+                        pdl = st.text_input(
+                            "PDL (Point de Livraison)",
+                            value=extracted_data.get("electricite", {}).get("pdl", ""),
+                            key="pdl_dual"
+                        )
+                        puissance = st.number_input(
+                            "Puissance (kVA)",
+                            value=float(extracted_data.get("electricite", {}).get("puissance_souscrite_kva", 0) or 0),
+                            min_value=0.0,
+                            key="puis_dual"
+                        )
+                        prix_abo_e = st.number_input(
+                            "Abonnement mensuel (€)",
+                            value=float(extracted_data.get("electricite", {}).get("tarifs", {}).get("abonnement_mensuel_ttc", 0) or 0),
+                            min_value=0.0,
+                            step=0.01,
+                            key="abo_e_dual"
+                        )
+
+                    with col2_e:
+                        date_debut_e = st.date_input(
+                            "Date de début (Elec)",
+                            value=datetime.now(), # TODO: Parse date
+                            key="date_deb_e_dual"
+                        )
+                        date_anniv_e = st.date_input(
+                            "Date anniversaire (Elec)",
+                            value=datetime.now(), # TODO: Parse date
+                            key="date_ann_e_dual"
+                        )
+                        prix_kwh_e = st.number_input(
+                            "Prix kWh (€)",
+                            value=float(extracted_data.get("electricite", {}).get("tarifs", {}).get("prix_kwh_ttc", 0) or 0),
+                            min_value=0.0,
+                            step=0.0001,
+                            format="%.4f",
+                            key="kwh_e_dual"
+                        )
+                        conso_annuelle_e = st.number_input(
+                            "Conso annuelle estimée (kWh)",
+                            value=float(extracted_data.get("electricite", {}).get("consommation_estimee_annuelle_kwh", 0) or 0),
+                            min_value=0.0,
+                            key="conso_e_dual"
+                        )
+                        
+                # --- GAZ ---
+                with tab_gaz:
+                    st.subheader("Contrat Gaz")
+                    col1_g, col2_g = st.columns(2)
+                    with col1_g:
+                        provider_g = st.text_input(
+                            "Fournisseur (Gaz)", 
+                            value=extracted_data.get("fournisseur", ""),
+                            key="prov_g"
+                        )
+                        pce = st.text_input(
+                            "PCE (Point Comptage)",
+                            value=extracted_data.get("gaz", {}).get("pce", ""),
+                            key="pce_dual"
+                        )
+                        zone_gaz = st.text_input(
+                            "Zone tarifaire",
+                            value=str(extracted_data.get("gaz", {}).get("zone_tarifaire", "")),
+                            key="zone_g_dual"
+                        )
+                        prix_abo_g = st.number_input(
+                            "Abonnement mensuel (€)",
+                            value=float(extracted_data.get("gaz", {}).get("tarifs", {}).get("abonnement_mensuel_ttc", 0) or 0),
+                            min_value=0.0,
+                            step=0.01,
+                            key="abo_g_dual"
+                        )
+
+                    with col2_g:
+                        date_debut_g = st.date_input(
+                            "Date de début (Gaz)",
+                            value=datetime.now(), # TODO: Parse date
+                            key="date_deb_g_dual"
+                        )
+                        date_anniv_g = st.date_input(
+                            "Date anniversaire (Gaz)",
+                            value=datetime.now(), # TODO: Parse date
+                            key="date_ann_g_dual"
+                        )
+                        prix_kwh_g = st.number_input(
+                            "Prix kWh (€)",
+                            value=float(extracted_data.get("gaz", {}).get("tarifs", {}).get("prix_kwh_ttc", 0) or 0),
+                            min_value=0.0,
+                            step=0.0001,
+                            format="%.4f",
+                            key="kwh_g_dual"
+                        )
+                        conso_annuelle_g = st.number_input(
+                            "Conso annuelle estimée (kWh)",
+                            value=float(extracted_data.get("gaz", {}).get("consommation_estimee_annuelle_kwh", 0) or 0),
+                            min_value=0.0,
+                            key="conso_g_dual"
+                        )
+
             if contract_type == "telephone":
                 col1, col2 = st.columns(2)
 
@@ -476,24 +614,78 @@ def show():
                         pdf_service = PDFService()
                         contract_service = ContractService(db, openai_service, pdf_service)
 
-                        # Créer le contrat
-                        contract = contract_service.create_contract(
-                            contract_type=st.session_state["contract_type"],
-                            provider=provider,
-                            start_date=datetime.strptime(
-                                validated_data.get("date_debut")
-                                or validated_data.get("date_effet"),
-                                "%Y-%m-%d",
-                            ),
-                            anniversary_date=datetime.strptime(
-                                validated_data["date_anniversaire"], "%Y-%m-%d"
-                            ),
-                            contract_data=validated_data,
-                            pdf_bytes=st.session_state["pdf_bytes"],
-                            filename=st.session_state["filename"],
-                        )
+                        if contract_type == "electricite_gaz":
+                            # Création du contrat Électricité
+                            contract_e = contract_service.create_contract(
+                                contract_type="electricite",
+                                provider=provider_e,
+                                start_date=date_debut_e,
+                                anniversary_date=date_anniv_e,
+                                contract_data={
+                                    "fournisseur": provider_e,
+                                    "pdl": pdl,
+                                    "puissance_souscrite_kva": puissance,
+                                    "prix_abonnement_mensuel": prix_abo_e,
+                                    "prix_kwh": {"base": prix_kwh_e},
+                                    "estimation_conso_annuelle_kwh": conso_annuelle_e,
+                                    "estimation_facture_annuelle": (prix_abo_e * 12)
+                                    + (prix_kwh_e * conso_annuelle_e),
+                                },
+                                pdf_bytes=st.session_state["pdf_bytes"],
+                                filename=st.session_state["filename"],
+                            )
 
-                        st.success(f"✅ Contrat enregistré avec succès ! (ID: {contract.id})")
+                            # Création du contrat Gaz
+                            contract_g = contract_service.create_contract(
+                                contract_type="gaz",
+                                provider=provider_g,
+                                start_date=date_debut_g,
+                                anniversary_date=date_anniv_g,
+                                contract_data={
+                                    "fournisseur": provider_g,
+                                    "pce": pce,
+                                    "zone_tarifaire": zone_gaz,
+                                    "prix_abonnement_mensuel": prix_abo_g,
+                                    "prix_kwh": prix_kwh_g,
+                                    "estimation_conso_annuelle_kwh": conso_annuelle_g,
+                                    "estimation_facture_annuelle": (prix_abo_g * 12)
+                                    + (prix_kwh_g * conso_annuelle_g),
+                                },
+                                pdf_bytes=st.session_state["pdf_bytes"],
+                                filename=st.session_state["filename"],
+                            )
+                            st.success(
+                                f"✅ 2 Contrats enregistrés avec succès ! (IDs: {contract_e.id}, {contract_g.id})"
+                            )
+
+                        else:
+                            # Créer le contrat unique
+                            # Si le type était "auto" mais résolu en un seul type, on utilise le type résolu
+                            final_type = (
+                                contract_type
+                                if contract_type != "auto"
+                                else st.session_state["contract_type"]
+                            )
+
+                            contract = contract_service.create_contract(
+                                contract_type=final_type,
+                                provider=provider,
+                                start_date=datetime.strptime(
+                                    validated_data.get("date_debut")
+                                    or validated_data.get("date_effet"),
+                                    "%Y-%m-%d",
+                                ),
+                                anniversary_date=datetime.strptime(
+                                    validated_data["date_anniversaire"], "%Y-%m-%d"
+                                ),
+                                contract_data=validated_data,
+                                pdf_bytes=st.session_state["pdf_bytes"],
+                                filename=st.session_state["filename"],
+                            )
+
+                            st.success(
+                                f"✅ Contrat enregistré avec succès ! (ID: {contract.id})"
+                            )
 
                         # Nettoyer la session
                         for key in [

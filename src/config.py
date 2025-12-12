@@ -24,6 +24,7 @@ NOTIFICATION_DAYS_BEFORE = int(os.getenv("NOTIFICATION_DAYS_BEFORE", "40"))
 
 # Types de contrats supportés
 CONTRACT_TYPES = {
+    "auto": "✨ Détection automatique",
     "telephone": "Téléphone",
     "assurance_pno": "Assurance PNO",
     "electricite": "Électricité",

@@ -170,7 +170,7 @@ class OpenAIService:
 
     def _get_contract_schema(self, contract_type: str) -> Dict[str, Any]:
         """Retourne le schéma JSON générique normalisé selon le type de contrat."""
-        valid_types = ["telephone", "assurance_pno", "electricite", "gaz"]
+        valid_types = ["telephone", "assurance_pno", "electricite", "gaz", "auto"]
         if contract_type not in valid_types:
             raise ValueError(f"Type de contrat non supporté: {contract_type}")
 
@@ -200,7 +200,7 @@ class OpenAIService:
             },
         }
 
-        if contract_type == "electricite":
+        if contract_type in ["electricite", "auto"]:
             base_schema.update(
                 {
                     "adresses": {"site_de_consommation": "", "adresse_facturation": ""},
@@ -227,7 +227,7 @@ class OpenAIService:
                 }
             )
 
-        elif contract_type == "gaz":
+        if contract_type in ["gaz", "auto"]:
             base_schema.update(
                 {
                     "adresses": {"site_de_consommation": "", "adresse_facturation": ""},
