@@ -26,7 +26,7 @@ def handle_extraction(uploaded_file, contract_type):
             filename=uploaded_file.name,
             contract_type=contract_type,
         )
-        
+
         return extracted_data, pdf_bytes
 
 
