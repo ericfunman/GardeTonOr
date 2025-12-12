@@ -118,40 +118,56 @@ def show():
         if not contracts:
             st.info("Aucun contrat enregistré. Commencez par ajouter un contrat !")
         else:
-            # Tableau des contrats
-            contracts_data = []
+            # Liste des contrats
             for contract in contracts:
-                # Calculer le coût mensuel/annuel selon le type
-                cost = "N/A"
-                if contract.contract_type == "telephone":
-                    cost = f"{contract.contract_data.get('prix_mensuel', 0):.2f} €/mois"
-                elif contract.contract_type == "assurance_pno":
-                    if contract.contract_data.get("prime_mensuelle"):
-                        cost = f"{contract.contract_data.get('prime_mensuelle', 0):.2f} €/mois"
-                    else:
-                        cost = f"{contract.contract_data.get('prime_annuelle', 0):.2f} €/an"
-                elif contract.contract_type in ["electricite", "gaz"]:
-                    if contract.contract_data.get("estimation_facture_annuelle"):
-                        cost_annual = contract.contract_data.get("estimation_facture_annuelle", 0)
-                        cost = f"{cost_annual:.2f} €/an ({cost_annual / 12:.2f} €/mois)"
-                    elif contract.contract_data.get("prix_abonnement_mensuel"):
-                        cost = (
-                            f"{contract.contract_data.get('prix_abonnement_mensuel', 0):.2f} €/mois"
+                with st.container():
+                    # Calculer le coût mensuel/annuel selon le type
+                    cost = "N/A"
+                    if contract.contract_type == "telephone":
+                        cost = f"{contract.contract_data.get('prix_mensuel', 0):.2f} €/mois"
+                    elif contract.contract_type == "assurance_pno":
+                        if contract.contract_data.get("prime_mensuelle"):
+                            cost = f"{contract.contract_data.get('prime_mensuelle', 0):.2f} €/mois"
+                        else:
+                            cost = f"{contract.contract_data.get('prime_annuelle', 0):.2f} €/an"
+                    elif contract.contract_type in ["electricite", "gaz"]:
+                        if contract.contract_data.get("estimation_facture_annuelle"):
+                            cost_annual = contract.contract_data.get(
+                                "estimation_facture_annuelle", 0
+                            )
+                            cost = f"{cost_annual:.2f} €/an ({cost_annual / 12:.2f} €/mois)"
+                        elif contract.contract_data.get("prix_abonnement_mensuel"):
+                            cost = f"{contract.contract_data.get('prix_abonnement_mensuel', 0):.2f} €/mois"
+
+                    col1, col2, col3, col4, col5 = st.columns([2, 2, 2, 2, 1])
+
+                    with col1:
+                        st.markdown(f"**{contract.provider}**")
+                        st.caption(
+                            CONTRACT_TYPES.get(contract.contract_type, contract.contract_type)
                         )
 
-                contracts_data.append(
-                    {
-                        "ID": contract.id,
-                        "Type": CONTRACT_TYPES.get(contract.contract_type, contract.contract_type),
-                        "Fournisseur": contract.provider,
-                        "Coût": cost,
-                        "Date anniversaire": contract.anniversary_date.strftime("%d/%m/%Y"),
-                        "Statut": "✅ Validé" if contract.validated else "⏳ En attente",
-                    }
-                )
+                    with col2:
+                        st.markdown(f"💰 **{cost}**")
 
-            df = pd.DataFrame(contracts_data)
-            st.dataframe(df, use_container_width=True, hide_index=True)
+                    with col3:
+                        st.markdown(
+                            f"📅 {contract.anniversary_date.strftime('%d/%m/%Y')}"
+                        )
+
+                    with col4:
+                        if st.button("🔍 Comparer", key=f"comp_list_{contract.id}"):
+                            st.session_state["compare_contract_id"] = contract.id
+                            st.session_state["navigation"] = "⚖️ Comparer"
+                            st.rerun()
+
+                    with col5:
+                        if st.button("🗑️", key=f"del_list_{contract.id}", help="Supprimer"):
+                            if contract_service.delete_contract(contract.id):
+                                st.success("Supprimé")
+                                st.rerun()
+
+                    st.divider()
 
             # Graphique d'évolution si historique de comparaisons
             st.markdown("### 📈 Évolution des économies potentielles")

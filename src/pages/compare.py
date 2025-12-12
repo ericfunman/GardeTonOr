@@ -31,33 +31,42 @@ def show():
 
         # Préremplir si vient du dashboard
         default_index = 0
+        contract_ids = [c.id for c in contracts]
+        
         if "compare_contract_id" in st.session_state:
             try:
-                default_index = [c.id for c in contracts].index(
-                    st.session_state["compare_contract_id"]
-                )
+                default_index = contract_ids.index(st.session_state["compare_contract_id"])
                 del st.session_state["compare_contract_id"]
             except ValueError:
                 pass
 
-        selected_contract = st.selectbox(
+        # Créer un dictionnaire pour l'affichage
+        contract_display = {
+            c.id: f"{CONTRACT_TYPES.get(c.contract_type)} - {c.provider} (Date anniversaire: {c.anniversary_date.strftime('%d/%m/%Y')})"
+            for c in contracts
+        }
+
+        selected_contract_id = st.selectbox(
             "Contrat",
-            options=contracts,
-            format_func=lambda x: f"{CONTRACT_TYPES.get(x.contract_type)} - {x.provider} (Date anniversaire: {x.anniversary_date.strftime('%d/%m/%Y')})",
-            index=default_index,
+            options=contract_ids,
+            format_func=lambda x: contract_display.get(x, f"Contrat {x}"),
+            index=default_index if contract_ids else 0,
         )
 
-        if selected_contract:
-            # Afficher les détails du contrat
-            # On copie les données nécessaires pour éviter les erreurs de session détachée
-            contract_data = selected_contract.contract_data
-            contract_id = selected_contract.id
-            contract_type = selected_contract.contract_type
+        if selected_contract_id:
+            # Récupérer l'objet frais depuis la session actuelle
+            selected_contract = contract_service.get_contract_by_id(selected_contract_id)
             
-            with st.expander("📄 Détails du contrat", expanded=False):
-                st.json(contract_data)
+            if selected_contract:
+                # Afficher les détails du contrat
+                contract_data = selected_contract.contract_data
+                contract_id = selected_contract.id
+                contract_type = selected_contract.contract_type
+                
+                with st.expander("📄 Détails du contrat", expanded=False):
+                    st.json(contract_data)
 
-            st.divider()
+                st.divider()
 
             # Type de comparaison
             st.markdown("### 🔍 Type de comparaison")
