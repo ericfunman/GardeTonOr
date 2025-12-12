@@ -39,7 +39,7 @@ class TestOpenAIServiceExtended:
         expected_data = {
             "fournisseur": "EDF",
             "prix_kwh": {"base": 0.20},
-            "prix_abonnement_mensuel": 15.0
+            "prix_abonnement_mensuel": 15.0,
         }
 
         mock_response = Mock()
@@ -52,17 +52,16 @@ class TestOpenAIServiceExtended:
 
         assert result["data"] == expected_data
         # Check user message content
-        assert "electricite" in mock_openai_client.chat.completions.create.call_args[1]["messages"][1]["content"]
+        assert (
+            "electricite"
+            in mock_openai_client.chat.completions.create.call_args[1]["messages"][1]["content"]
+        )
 
     def test_extract_contract_data_gaz(self, mock_openai_client):
         """Test d'extraction pour le gaz."""
         service = OpenAIService(api_key="test")
 
-        expected_data = {
-            "fournisseur": "Engie",
-            "prix_kwh": 0.08,
-            "prix_abonnement_mensuel": 20.0
-        }
+        expected_data = {"fournisseur": "Engie", "prix_kwh": 0.08, "prix_abonnement_mensuel": 20.0}
 
         mock_response = Mock()
         mock_choice = Mock()
@@ -74,7 +73,10 @@ class TestOpenAIServiceExtended:
 
         assert result["data"] == expected_data
         # Check user message content
-        assert "gaz" in mock_openai_client.chat.completions.create.call_args[1]["messages"][1]["content"]
+        assert (
+            "gaz"
+            in mock_openai_client.chat.completions.create.call_args[1]["messages"][1]["content"]
+        )
 
     def test_extract_contract_data_json_error(self, mock_openai_client):
         """Test de gestion d'erreur JSON malformé."""

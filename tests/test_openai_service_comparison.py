@@ -18,11 +18,7 @@ class TestOpenAIServiceComparison:
     def test_compare_with_market_telephone(self, mock_openai_client):
         """Test de comparaison marché pour un forfait mobile."""
         service = OpenAIService(api_key="test")
-        contract_data = {
-            "fournisseur": "Orange",
-            "prix_mensuel": 50.0,
-            "data_go": 10
-        }
+        contract_data = {"fournisseur": "Orange", "prix_mensuel": 50.0, "data_go": 10}
 
         expected_analysis = {
             "recommandation": "Changer",
@@ -30,8 +26,8 @@ class TestOpenAIServiceComparison:
             "comparaison_prix": {
                 "prix_actuel": 50.0,
                 "prix_concurrent": 15.0,
-                "economie_potentielle": 35.0
-            }
+                "economie_potentielle": 35.0,
+            },
         }
 
         mock_response = Mock()
@@ -49,11 +45,7 @@ class TestOpenAIServiceComparison:
     def test_compare_with_market_electricite(self, mock_openai_client):
         """Test de comparaison marché pour l'électricité."""
         service = OpenAIService(api_key="test")
-        contract_data = {
-            "fournisseur": "EDF",
-            "prix_kwh": 0.25,
-            "puissance_souscrite_kva": 6
-        }
+        contract_data = {"fournisseur": "EDF", "prix_kwh": 0.25, "puissance_souscrite_kva": 6}
 
         expected_analysis = {
             "recommandation": "Garder",
@@ -61,8 +53,8 @@ class TestOpenAIServiceComparison:
             "comparaison_prix": {
                 "prix_actuel": 0.25,
                 "prix_concurrent": 0.24,
-                "economie_potentielle": 0.01
-            }
+                "economie_potentielle": 0.01,
+            },
         }
 
         mock_response = Mock()
@@ -82,10 +74,7 @@ class TestOpenAIServiceComparison:
         contract_data = {"prix": 100}
         competitor_data = {"prix": 80}
 
-        expected_analysis = {
-            "recommandation": "Changer pour le concurrent",
-            "economie": 20
-        }
+        expected_analysis = {"recommandation": "Changer pour le concurrent", "economie": 20}
 
         mock_response = Mock()
         mock_choice = Mock()

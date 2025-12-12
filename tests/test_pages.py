@@ -18,13 +18,14 @@ def test_dashboard_page_loads(db_session, sample_contract_data_telephone):
     """Test que la page dashboard se charge et affiche les contrats."""
     # Créer un contrat de test
     from datetime import datetime
+
     contract = Contract(
         contract_type="telephone",
         provider="Free Mobile",
         start_date=datetime.now(),
         anniversary_date=datetime.now(),
         contract_data=sample_contract_data_telephone,
-        original_filename="test.pdf"
+        original_filename="test.pdf",
     )
     db_session.add(contract)
     db_session.commit()
@@ -77,13 +78,14 @@ def test_dashboard_page_loads(db_session, sample_contract_data_telephone):
 def test_dashboard_delete_contract(db_session, sample_contract_data_telephone):
     """Test la suppression d'un contrat depuis le dashboard."""
     from datetime import datetime
+
     contract = Contract(
         contract_type="telephone",
         provider="Free Mobile",
         start_date=datetime.now(),
         anniversary_date=datetime.now(),
         contract_data=sample_contract_data_telephone,
-        original_filename="test.pdf"
+        original_filename="test.pdf",
     )
     db_session.add(contract)
     db_session.commit()
@@ -147,9 +149,9 @@ def test_add_contract_extraction(db_session, sample_contract_data_telephone):
     at = AppTest.from_file("src/pages/add_contract.py")
 
     # Mock services
-    with patch("src.database.get_db") as mock_get_db, \
-         patch("src.services.ContractService.extract_and_create_contract") as mock_extract:
-
+    with patch("src.database.get_db") as mock_get_db, patch(
+        "src.services.ContractService.extract_and_create_contract"
+    ) as mock_extract:
         mock_get_db.return_value = mock_get_db_context(db_session)
 
         # Setup mock return

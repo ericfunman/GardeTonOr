@@ -24,8 +24,13 @@ class TestComparePageCoverage:
             provider="Orange",
             start_date=datetime.now(),
             anniversary_date=datetime.now(),
-            contract_data={"prix_mensuel": 50, "data_go": 10, "fournisseur": "Orange", "forfait_nom": "Origami"},
-            original_filename="test.pdf"
+            contract_data={
+                "prix_mensuel": 50,
+                "data_go": 10,
+                "fournisseur": "Orange",
+                "forfait_nom": "Origami",
+            },
+            original_filename="test.pdf",
         )
         db_session.add(contract)
         db_session.commit()
@@ -42,33 +47,31 @@ class TestComparePageCoverage:
                     "tarif_actuel": 50,
                     "economie_potentielle_annuelle": 120,
                     "economie_potentielle_mensuelle": 10,
-                    "estimation_marche": {
-                        "tarif_moyen": 40
-                    },
+                    "estimation_marche": {"tarif_moyen": 40},
                     "offres_similaires": [
                         {
                             "fournisseur": "Sosh",
                             "forfait": "Sosh 20Go",
                             "prix_mensuel": 20,
                             "avantages": ["Sans engagement", "Reseau Orange"],
-                            "inconvenients": ["Service client digital"]
+                            "inconvenients": ["Service client digital"],
                         }
-                    ]
+                    ],
                 },
                 "meilleure_offre": {
                     "fournisseur": "Free",
                     "forfait_nom": "Free 5G",
                     "data_go": 210,
-                    "prix_mensuel": 19.99
-                }
+                    "prix_mensuel": 19.99,
+                },
             },
             "prompt": "prompt",
-            "raw_response": "response"
+            "raw_response": "response",
         }
 
-        with patch("src.database.get_db") as mock_get_db, \
-             patch("src.services.openai_service.OpenAIService.compare_with_market") as mock_compare:
-
+        with patch("src.database.get_db") as mock_get_db, patch(
+            "src.services.openai_service.OpenAIService.compare_with_market"
+        ) as mock_compare:
             mock_get_db.side_effect = lambda: mock_get_db_context(db_session)
             mock_compare.return_value = rich_analysis
 
@@ -106,7 +109,7 @@ class TestComparePageCoverage:
             start_date=datetime.now(),
             anniversary_date=datetime.now(),
             contract_data={"prix_mensuel": 50},
-            original_filename="test.pdf"
+            original_filename="test.pdf",
         )
         db_session.add(contract)
         db_session.commit()
@@ -121,18 +124,20 @@ class TestComparePageCoverage:
                 "comparaison_prix": {
                     "prix_actuel": 50,
                     "prix_concurrent": 60,
-                    "economie_potentielle": -10
-                }
+                    "economie_potentielle": -10,
+                },
             },
             "prompt": "prompt",
-            "raw_response": "response"
+            "raw_response": "response",
         }
 
-        with patch("src.database.get_db") as mock_get_db, \
-             patch("src.services.openai_service.OpenAIService.compare_with_competitor") as mock_compare, \
-             patch("src.services.openai_service.OpenAIService.extract_contract_data") as mock_extract, \
-             patch("src.services.pdf_service.PDFService.extract_text_from_pdf") as mock_pdf:
-
+        with patch("src.database.get_db") as mock_get_db, patch(
+            "src.services.openai_service.OpenAIService.compare_with_competitor"
+        ) as mock_compare, patch(
+            "src.services.openai_service.OpenAIService.extract_contract_data"
+        ) as mock_extract, patch(
+            "src.services.pdf_service.PDFService.extract_text_from_pdf"
+        ) as mock_pdf:
             mock_get_db.side_effect = lambda: mock_get_db_context(db_session)
             mock_compare.return_value = competitor_analysis
             mock_extract.return_value = {"data": {"prix": 60}}
@@ -159,7 +164,6 @@ class TestComparePageCoverage:
                         self.type = type
 
                     def read(self):
-
                         return self.data
 
                 # But AppTest expects specific structure.
@@ -214,16 +218,17 @@ class TestAddContractPageCoverage:
         at = AppTest.from_file("src/pages/add_contract.py")
 
         # Mock services
-        with patch("src.database.get_db") as mock_get_db, \
-             patch("src.services.openai_service.OpenAIService.extract_contract_data") as mock_extract, \
-             patch("src.services.pdf_service.PDFService.extract_text_from_pdf") as mock_pdf:
-
+        with patch("src.database.get_db") as mock_get_db, patch(
+            "src.services.openai_service.OpenAIService.extract_contract_data"
+        ) as mock_extract, patch(
+            "src.services.pdf_service.PDFService.extract_text_from_pdf"
+        ) as mock_pdf:
             mock_get_db.side_effect = lambda: mock_get_db_context(db_session)
             mock_extract.return_value = {
                 "data": {"fournisseur": "EDF", "prix_kwh": 0.20},
                 "prompt": "prompt",
                 "raw_response": "response",
-                "schema": {}
+                "schema": {},
             }
             mock_pdf.return_value = "Contrat EDF..."
 
@@ -259,11 +264,9 @@ class TestAddContractPageCoverage:
                     self.file_id = "test_file_id"
 
                 def read(self):
-
                     return self.data
 
                 def getvalue(self):
-
                     return self.data
 
             # file = MockUploadedFile("test.pdf", "application/pdf", b"content")
@@ -300,18 +303,23 @@ class TestComparePageDirect:
                     "fournisseur": "Sosh",
                     "prix_mensuel": 20,
                     "avantages": ["A"],
-                    "inconvenients": ["B"]
+                    "inconvenients": ["B"],
                 }
             ],
             "meilleure_offre": {
                 "fournisseur": "Free",
                 "prix_mensuel": 19.99,
                 "data_go": 210,
-                "forfait_nom": "Free 5G"
-            }
+                "forfait_nom": "Free 5G",
+            },
         }
         comparison.contract.contract_type = "telephone"
-        comparison.contract.contract_data = {"fournisseur": "Orange", "prix_mensuel": 100, "data_go": 10, "forfait_nom": "Origami"}
+        comparison.contract.contract_data = {
+            "fournisseur": "Orange",
+            "prix_mensuel": 100,
+            "data_go": 10,
+            "forfait_nom": "Origami",
+        }
 
         # Mock streamlit
         with patch("src.pages.compare.st") as mock_st:
@@ -349,17 +357,23 @@ class TestComparePageDirect:
             "meilleure_offre": {
                 "fournisseur": "TotalEnergies",
                 "prix_kwh": 0.19,
-                "prix_abonnement": 15
-            }
+                "prix_abonnement": 15,
+            },
         }
         comparison.contract.contract_type = "electricite"
-        comparison.contract.contract_data = {"fournisseur": "EDF", "prix_kwh": 0.20, "prix_abonnement": 15}
+        comparison.contract.contract_data = {
+            "fournisseur": "EDF",
+            "prix_kwh": 0.20,
+            "prix_abonnement": 15,
+        }
 
         with patch("src.pages.compare.st") as mock_st:
+
             def side_effect_columns(spec):
                 if isinstance(spec, int):
                     return [MagicMock() for _ in range(spec)]
                 return [MagicMock()]
+
             mock_st.columns.side_effect = side_effect_columns
             mock_st.container.return_value.__enter__.return_value = mock_st
 
@@ -378,11 +392,12 @@ class TestComparePageDirect:
             "comparaison_prix": {
                 "prix_actuel": 100,
                 "prix_concurrent": 120,
-                "economie_potentielle": -20
-            }
+                "economie_potentielle": -20,
+            },
         }
 
         with patch("src.pages.compare.st") as mock_st:
+
             def side_effect_columns(spec):
                 if isinstance(spec, int):
                     return [MagicMock() for _ in range(spec)]
@@ -414,7 +429,7 @@ class TestDashboardPageCoverage:
             start_date=datetime.now() - timedelta(days=300),
             anniversary_date=datetime.now() + timedelta(days=10, hours=12),
             contract_data={"prix_mensuel": 50},
-            original_filename="test.pdf"
+            original_filename="test.pdf",
         )
         db_session.add(contract)
         db_session.commit()

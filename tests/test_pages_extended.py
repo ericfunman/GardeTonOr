@@ -39,7 +39,7 @@ class TestAddContractPage:
             "prix_kwh": {"base": 0.20},
             "prix_abonnement_mensuel": 15.0,
             "date_debut": "2023-01-01",
-            "date_fin": "2024-01-01"
+            "date_fin": "2024-01-01",
         }
         at.session_state["filename"] = "test.pdf"
         at.session_state["pdf_bytes"] = b"fake pdf content"
@@ -50,7 +50,10 @@ class TestAddContractPage:
 
         assert not at.exception
         # Vérifier que l'étape 2 est affichée
-        assert "Étape 2 : Valider les données extraites" in [m.value for m in at.markdown if "Étape 2" in m.value][0]
+        assert (
+            "Étape 2 : Valider les données extraites"
+            in [m.value for m in at.markdown if "Étape 2" in m.value][0]
+        )
 
         # Vérifier que les champs de formulaire sont pré-remplis
         # Note: Streamlit AppTest ne permet pas facilement d'inspecter les valeurs par défaut des widgets
@@ -74,7 +77,7 @@ class TestAddContractPage:
             "prix_kwh": {"base": 0.20},
             "prix_abonnement_mensuel": 15.0,
             "date_debut": "2023-01-01",
-            "date_fin": "2024-01-01"
+            "date_fin": "2024-01-01",
         }
         at.session_state["filename"] = "test.pdf"
         at.session_state["pdf_bytes"] = b"fake pdf content"
@@ -106,13 +109,14 @@ class TestComparePage:
     def test_compare_page_with_contracts(self, db_session, sample_contract_data_telephone):
         """Test la page de comparaison avec des contrats existants."""
         from src.database.models import Contract
+
         contract = Contract(
             contract_type="telephone",
             provider="Free Mobile",
             start_date=datetime.now(),
             anniversary_date=datetime.now(),
             contract_data=sample_contract_data_telephone,
-            original_filename="test.pdf"
+            original_filename="test.pdf",
         )
         db_session.add(contract)
         db_session.commit()
@@ -151,7 +155,7 @@ class TestHistoryPage:
             start_date=datetime.now(),
             anniversary_date=datetime.now(),
             contract_data=sample_contract_data_telephone,
-            original_filename="test.pdf"
+            original_filename="test.pdf",
         )
         db_session.add(contract)
         db_session.flush()
@@ -162,7 +166,7 @@ class TestHistoryPage:
             comparison_result={"economie_potentielle_annuelle": 100},
             gpt_prompt="prompt",
             gpt_response="response",
-            analysis_summary="Résumé de l'analyse"
+            analysis_summary="Résumé de l'analyse",
         )
         db_session.add(comp)
         db_session.commit()
@@ -225,17 +229,14 @@ class TestAddContractPageExtended(TestAddContractPage):
             "electricite": {
                 "pdl": "123",
                 "tarifs": {"prix_kwh_ttc": 0.20, "abonnement_mensuel_ttc": 15.0},
-                "consommation_estimee_annuelle_kwh": 1000
+                "consommation_estimee_annuelle_kwh": 1000,
             },
             "gaz": {
                 "pce": "456",
                 "tarifs": {"prix_kwh_ttc": 0.08, "abonnement_mensuel_ttc": 20.0},
-                "consommation_estimee_annuelle_kwh": 5000
+                "consommation_estimee_annuelle_kwh": 5000,
             },
-            "dates": {
-                "date_debut": "01/01/2024",
-                "date_anniversaire": "01/01/2025"
-            }
+            "dates": {"date_debut": "01/01/2024", "date_anniversaire": "01/01/2025"},
         }
         at.session_state["filename"] = "dual.pdf"
         at.session_state["pdf_bytes"] = b"fake pdf"
@@ -258,7 +259,7 @@ class TestAddContractPageExtended(TestAddContractPage):
             "prix_abonnement_mensuel": 15.0,
             "adresse_assuree": "123 Rue Test",
             "date_debut": "01/01/2024",
-            "date_anniversaire": "01/01/2025"
+            "date_anniversaire": "01/01/2025",
         }
         at.session_state["filename"] = "pno.pdf"
         at.session_state["pdf_bytes"] = b"fake pdf"
@@ -281,7 +282,7 @@ class TestAddContractPageExtended(TestAddContractPage):
             "prix_abonnement_mensuel": 19.99,
             "data_go": 200,
             "date_debut": "01/01/2024",
-            "date_anniversaire": "01/01/2025"
+            "date_anniversaire": "01/01/2025",
         }
         at.session_state["filename"] = "mobile.pdf"
         at.session_state["pdf_bytes"] = b"fake pdf"
@@ -299,13 +300,14 @@ class TestComparePageExtended(TestComparePage):
     def test_compare_run_market_analysis(self, db_session, sample_contract_data_telephone):
         """Test l'exécution d'une analyse de marché."""
         from src.database.models import Contract
+
         contract = Contract(
             contract_type="telephone",
             provider="Free Mobile",
             start_date=datetime.now(),
             anniversary_date=datetime.now(),
             contract_data=sample_contract_data_telephone,
-            original_filename="test.pdf"
+            original_filename="test.pdf",
         )
         db_session.add(contract)
         db_session.commit()
@@ -313,9 +315,9 @@ class TestComparePageExtended(TestComparePage):
         at = AppTest.from_file("src/pages/compare.py")
 
         # Mocker OpenAIService pour retourner une analyse
-        with patch("src.database.get_db") as mock_get_db, \
-             patch("src.services.openai_service.OpenAIService.compare_with_market") as mock_compare:
-
+        with patch("src.database.get_db") as mock_get_db, patch(
+            "src.services.openai_service.OpenAIService.compare_with_market"
+        ) as mock_compare:
             mock_get_db.side_effect = lambda: mock_get_db_context(db_session)
             mock_compare.return_value = {
                 "analysis": {
@@ -323,11 +325,11 @@ class TestComparePageExtended(TestComparePage):
                     "justification": "Trop cher",
                     "niveau_competitivite": "Faible",
                     "tarif_actuel": 100,
-                    "economie_potentielle_annuelle": 50
+                    "economie_potentielle_annuelle": 50,
                 },
                 "meilleure_offre": {},
                 "prompt": "test prompt",
-                "raw_response": "test response"
+                "raw_response": "test response",
             }
 
             at.run(timeout=10)
@@ -378,13 +380,14 @@ class TestDashboardPageExtended:
     def test_dashboard_metrics(self, db_session, sample_contract_data_telephone):
         """Test les métriques du dashboard."""
         from src.database.models import Contract
+
         contract = Contract(
             contract_type="telephone",
             provider="Free Mobile",
             start_date=datetime.now(),
             anniversary_date=datetime.now(),
             contract_data=sample_contract_data_telephone,
-            original_filename="test.pdf"
+            original_filename="test.pdf",
         )
         db_session.add(contract)
         db_session.commit()
@@ -404,13 +407,14 @@ class TestDashboardPageExtended:
     def test_dashboard_contract_list(self, db_session, sample_contract_data_telephone):
         """Test l'affichage de la liste des contrats."""
         from src.database.models import Contract
+
         contract = Contract(
             contract_type="telephone",
             provider="Free Mobile",
             start_date=datetime.now(),
             anniversary_date=datetime.now(),
             contract_data=sample_contract_data_telephone,
-            original_filename="test.pdf"
+            original_filename="test.pdf",
         )
         db_session.add(contract)
         db_session.commit()
@@ -429,4 +433,6 @@ class TestDashboardPageExtended:
                     found_provider = True
                     break
 
-            assert found_provider, "Le fournisseur 'Free Mobile' n'est pas affiché dans le dashboard"
+            assert (
+                found_provider
+            ), "Le fournisseur 'Free Mobile' n'est pas affiché dans le dashboard"
