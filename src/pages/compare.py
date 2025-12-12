@@ -483,7 +483,6 @@ def display_competitor_comparison(comparison):
         st.json(result)
 
 
-
 def handle_market_analysis(contract_service, contract_id):
     """Gère l'analyse de marché."""
     st.markdown("#### 📊 Analyse de marché")
