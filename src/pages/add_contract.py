@@ -256,6 +256,11 @@ def show():
                 }
 
             elif contract_type == "electricite":
+                elec_data = extracted_data.get("electricite", {})
+                dates_data = extracted_data.get("dates", {})
+                tarifs_data = elec_data.get("tarifs", {})
+                adresses_data = extracted_data.get("adresses", {})
+
                 col1, col2 = st.columns(2)
 
                 with col1:
@@ -266,30 +271,29 @@ def show():
                         "Numéro de contrat", value=extracted_data.get("numero_contrat", "")
                     )
                     type_offre = st.text_input(
-                        "Type d'offre", value=extracted_data.get("type_offre", "")
+                        "Type d'offre", value=elec_data.get("option_tarifaire", "")
                     )
                     puissance_kva = st.number_input(
                         "Puissance souscrite (kVA)",
-                        value=float(extracted_data.get("puissance_souscrite_kva", 0)),
+                        value=float(elec_data.get("puissance_souscrite_kva") or 0),
                         min_value=0.0,
                     )
                     option_tarifaire = st.text_input(
-                        "Option tarifaire", value=extracted_data.get("option_tarifaire", "Base")
+                        "Option tarifaire", value=elec_data.get("option_tarifaire", "Base")
                     )
-                    pdl = st.text_input("Numéro PDL", value=extracted_data.get("pdl", ""))
+                    pdl = st.text_input("Numéro PDL", value=elec_data.get("pdl", ""))
 
                 with col2:
                     prix_abo = st.number_input(
                         "Abonnement mensuel (€)",
-                        value=float(extracted_data.get("prix_abonnement_mensuel", 0)),
+                        value=float(tarifs_data.get("abonnement_mensuel_ttc") or 0),
                         min_value=0.0,
                         step=0.01,
                     )
 
-                    prix_kwh_data = extracted_data.get("prix_kwh", {})
                     prix_kwh_base = st.number_input(
-                        "Prix kWh Base (€)",
-                        value=float(prix_kwh_data.get("base", 0)),
+                        "Prix kWh TTC (€)",
+                        value=float(tarifs_data.get("prix_kwh_ttc") or 0),
                         min_value=0.0,
                         step=0.001,
                         format="%.4f",
@@ -297,29 +301,40 @@ def show():
 
                     conso_annuelle = st.number_input(
                         "Consommation annuelle (kWh)",
-                        value=float(extracted_data.get("estimation_conso_annuelle_kwh", 0)),
+                        value=float(elec_data.get("consommation_estimee_annuelle_kwh") or 0),
                         min_value=0.0,
                     )
 
+                    date_debut_str = dates_data.get("date_debut")
+                    if not date_debut_str:
+                        date_debut_val = datetime.now()
+                    else:
+                        try:
+                            date_debut_val = datetime.strptime(date_debut_str, "%d/%m/%Y")
+                        except ValueError:
+                            date_debut_val = datetime.now()
+
                     date_debut = st.date_input(
                         "Date de début",
-                        value=datetime.strptime(
-                            extracted_data.get("date_debut", datetime.now().strftime("%Y-%m-%d")),
-                            "%Y-%m-%d",
-                        ),
+                        value=date_debut_val,
                     )
+
+                    date_anniv_str = dates_data.get("date_anniversaire")
+                    if not date_anniv_str:
+                        date_anniv_val = datetime.now()
+                    else:
+                        try:
+                            date_anniv_val = datetime.strptime(date_anniv_str, "%d/%m/%Y")
+                        except ValueError:
+                            date_anniv_val = datetime.now()
+
                     date_anniversaire = st.date_input(
                         "Date anniversaire",
-                        value=datetime.strptime(
-                            extracted_data.get(
-                                "date_anniversaire", datetime.now().strftime("%Y-%m-%d")
-                            ),
-                            "%Y-%m-%d",
-                        ),
+                        value=date_anniv_val,
                     )
 
                 adresse = st.text_input(
-                    "Adresse de fourniture", value=extracted_data.get("adresse_fourniture", "")
+                    "Adresse de fourniture", value=adresses_data.get("site_de_consommation", "")
                 )
                 conditions = st.text_area(
                     "Conditions de résiliation",
@@ -345,6 +360,11 @@ def show():
                 }
 
             elif contract_type == "gaz":
+                gaz_data = extracted_data.get("gaz", {})
+                dates_data = extracted_data.get("dates", {})
+                tarifs_data = gaz_data.get("tarifs", {})
+                adresses_data = extracted_data.get("adresses", {})
+
                 col1, col2 = st.columns(2)
 
                 with col1:
@@ -355,24 +375,24 @@ def show():
                         "Numéro de contrat", value=extracted_data.get("numero_contrat", "")
                     )
                     type_offre = st.text_input(
-                        "Type d'offre", value=extracted_data.get("type_offre", "")
+                        "Type d'offre", value=gaz_data.get("option_tarifaire", "")
                     )
                     classe_conso = st.text_input(
                         "Classe de consommation",
-                        value=extracted_data.get("classe_consommation", "Base"),
+                        value=gaz_data.get("option_tarifaire", "Base"),
                     )
-                    pce = st.text_input("Numéro PCE", value=extracted_data.get("pce", ""))
+                    pce = st.text_input("Numéro PCE", value=gaz_data.get("pce", ""))
 
                 with col2:
                     prix_abo = st.number_input(
                         "Abonnement mensuel (€)",
-                        value=float(extracted_data.get("prix_abonnement_mensuel", 0)),
+                        value=float(tarifs_data.get("abonnement_mensuel_ttc") or 0),
                         min_value=0.0,
                         step=0.01,
                     )
                     prix_kwh = st.number_input(
                         "Prix kWh (€)",
-                        value=float(extracted_data.get("prix_kwh", 0)),
+                        value=float(tarifs_data.get("prix_kwh_ttc") or 0),
                         min_value=0.0,
                         step=0.001,
                         format="%.4f",
@@ -380,29 +400,40 @@ def show():
 
                     conso_annuelle = st.number_input(
                         "Consommation annuelle (kWh)",
-                        value=float(extracted_data.get("estimation_conso_annuelle_kwh", 0)),
+                        value=float(gaz_data.get("consommation_estimee_annuelle_kwh") or 0),
                         min_value=0.0,
                     )
 
+                    date_debut_str = dates_data.get("date_debut")
+                    if not date_debut_str:
+                        date_debut_val = datetime.now()
+                    else:
+                        try:
+                            date_debut_val = datetime.strptime(date_debut_str, "%d/%m/%Y")
+                        except ValueError:
+                            date_debut_val = datetime.now()
+
                     date_debut = st.date_input(
                         "Date de début",
-                        value=datetime.strptime(
-                            extracted_data.get("date_debut", datetime.now().strftime("%Y-%m-%d")),
-                            "%Y-%m-%d",
-                        ),
+                        value=date_debut_val,
                     )
+
+                    date_anniv_str = dates_data.get("date_anniversaire")
+                    if not date_anniv_str:
+                        date_anniv_val = datetime.now()
+                    else:
+                        try:
+                            date_anniv_val = datetime.strptime(date_anniv_str, "%d/%m/%Y")
+                        except ValueError:
+                            date_anniv_val = datetime.now()
+
                     date_anniversaire = st.date_input(
                         "Date anniversaire",
-                        value=datetime.strptime(
-                            extracted_data.get(
-                                "date_anniversaire", datetime.now().strftime("%Y-%m-%d")
-                            ),
-                            "%Y-%m-%d",
-                        ),
+                        value=date_anniv_val,
                     )
 
                 adresse = st.text_input(
-                    "Adresse de fourniture", value=extracted_data.get("adresse_fourniture", "")
+                    "Adresse de fourniture", value=adresses_data.get("site_de_consommation", "")
                 )
                 conditions = st.text_area(
                     "Conditions de résiliation",
