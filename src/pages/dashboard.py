@@ -173,8 +173,8 @@ def show():
 
                     with col4:
                         st.button(
-                            "👁️", 
-                            key=f"view_list_{contract.id}", 
+                            "👁️",
+                            key=f"view_list_{contract.id}",
                             help="Visualiser",
                             on_click=go_to_view,
                             args=(contract.id,)

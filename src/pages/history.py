@@ -145,7 +145,7 @@ def show():
                 market_analysis = comp.comparison_result.get("analyse", {})
                 if not isinstance(market_analysis, dict):
                     market_analysis = {}
-                    
+
                 recommandation = (
                     comp.comparison_result.get("recommandation") 
                     or market_analysis.get("recommandation", "")

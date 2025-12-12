@@ -451,7 +451,7 @@ def show():
                     nombre_pieces = st.number_input(
                         "Nombre de pièces", value=int(bien.get("nombre_pieces", 0) or 0), min_value=0
                     )
-                    
+
                     st.markdown("**Équipements spécifiques**")
                     col_eq1, col_eq2 = st.columns(2)
                     with col_eq1:
@@ -475,7 +475,7 @@ def show():
                         min_value=0.0,
                         step=0.01,
                     )
-                    
+
                     franchises = extracted_data.get("franchises", {})
                     franchise = st.number_input(
                         "Franchise générale (€)",
@@ -485,10 +485,11 @@ def show():
                     )
 
                     dates = extracted_data.get("dates", {})
-                    
+
                     # Helper pour parser les dates
                     def parse_date(date_str):
-                        if not date_str: return datetime.now()
+                        if not date_str:
+                            return datetime.now()
                         for fmt in ["%d/%m/%Y", "%Y-%m-%d"]:
                             try:
                                 return datetime.strptime(date_str, fmt)

@@ -14,6 +14,7 @@ def mock_get_db_context(session):
     finally:
         pass
 
+
 class TestViewContractsPage:
     """Tests pour la page de visualisation des contrats."""
 
@@ -310,7 +311,7 @@ class TestViewContractsPage:
             anniversary_date=datetime.now(),
             contract_data={
                 "fournisseur": "LegacyProvider",
-                "prix_kwh": 0.15, # Format plat
+                "prix_kwh": 0.15,  # Format plat
                 "prix_abonnement": 10.0
             },
             original_filename="legacy.pdf",
