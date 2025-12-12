@@ -39,9 +39,7 @@ def _display_contract_header(contract):
     col1, col2 = st.columns([2, 1])
     with col1:
         st.subheader(f"{contract.provider}")
-        st.caption(
-            f"Type: {CONTRACT_TYPES.get(contract.contract_type, contract.contract_type)}"
-        )
+        st.caption(f"Type: {CONTRACT_TYPES.get(contract.contract_type, contract.contract_type)}")
     with col2:
         st.metric("Date anniversaire", contract.anniversary_date.strftime("%d/%m/%Y"))
 

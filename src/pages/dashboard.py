@@ -87,9 +87,7 @@ def _display_alerts(contracts_needing_attention):
 
             with col1:
                 st.markdown(f"**{contract.provider}**")
-                st.caption(
-                    f"{CONTRACT_TYPES.get(contract.contract_type, contract.contract_type)}"
-                )
+                st.caption(f"{CONTRACT_TYPES.get(contract.contract_type, contract.contract_type)}")
 
             with col2:
                 st.markdown(
@@ -142,9 +140,7 @@ def _display_contract_list(contracts, contract_service):
 
                 with col1:
                     st.markdown(f"**{contract.provider}**")
-                    st.caption(
-                        CONTRACT_TYPES.get(contract.contract_type, contract.contract_type)
-                    )
+                    st.caption(CONTRACT_TYPES.get(contract.contract_type, contract.contract_type))
 
                 with col2:
                     st.markdown(f"💰 **{cost}**")
@@ -187,10 +183,7 @@ def _display_charts(contract_service):
     if all_comparisons:
         comparison_data = []
         for comp in all_comparisons:
-            if (
-                comp.comparison_result
-                and "economie_potentielle_annuelle" in comp.comparison_result
-            ):
+            if comp.comparison_result and "economie_potentielle_annuelle" in comp.comparison_result:
                 comparison_data.append(
                     {
                         "Date": comp.created_at,
@@ -213,9 +206,7 @@ def _display_charts(contract_service):
             )
             st.plotly_chart(fig, use_container_width=True)
         else:
-            st.info(
-                "Effectuez des comparaisons pour voir l'évolution des économies potentielles"
-            )
+            st.info("Effectuez des comparaisons pour voir l'évolution des économies potentielles")
     else:
         st.info("Aucune comparaison effectuée pour le moment")
 
