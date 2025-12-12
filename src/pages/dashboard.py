@@ -103,8 +103,6 @@ def show():
 
         if not contracts:
             st.info("Aucun contrat enregistré. Commencez par ajouter un contrat !")
-            if st.button("➕ Ajouter mon premier contrat"):
-                st.switch_page("pages/add_contract.py")
         else:
             # Tableau des contrats
             contracts_data = []
