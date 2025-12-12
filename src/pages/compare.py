@@ -400,7 +400,7 @@ def display_competitor_comparison(comparison):
         )
     else:
         st.markdown(
-            f'<div class="alert-info">' f"<h4>💡 Recommandation : {recommandation}</h4>" f"</div>",
+            f'<div class="alert-info"><h4>💡 Recommandation : {recommandation}</h4></div>',
             unsafe_allow_html=True,
         )
 
