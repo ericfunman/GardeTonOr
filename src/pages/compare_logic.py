@@ -1,7 +1,7 @@
-
 import streamlit as st
 import pandas as pd
-from src.config import DATE_FORMAT, LABEL_ECONOMY, LABEL_SURCOST
+from src.config import LABEL_ECONOMY, LABEL_SURCOST
+
 
 def _display_recommendation(result):
     recommandation = result.get("recommandation", "")
@@ -23,6 +23,7 @@ def _display_recommendation(result):
             f"</div>",
             unsafe_allow_html=True,
         )
+
 
 def _display_financial_metrics(result):
     st.markdown("#### 💰 Analyse financière")
@@ -71,6 +72,7 @@ def _display_financial_metrics(result):
                 delta=LABEL_ECONOMY if economie_mensuelle > 0 else LABEL_SURCOST,
             )
 
+
 def _display_similar_offers(result):
     if "offres_similaires" in result and result["offres_similaires"]:
         st.markdown("#### 🏪 Offres similaires sur le marché")
@@ -106,6 +108,7 @@ def _display_similar_offers(result):
 
                 st.divider()
 
+
 def _get_val(data, *keys):
     res = data
     for k in keys:
@@ -114,6 +117,7 @@ def _get_val(data, *keys):
         else:
             return None
     return res
+
 
 def _build_comparison_rows(c_type, current_data, best_offer_data):
     rows = []
@@ -241,6 +245,7 @@ def _build_comparison_rows(c_type, current_data, best_offer_data):
         ]
     return rows
 
+
 def _display_comparison_table(comparison, best_offer_data):
     if best_offer_data:
         st.markdown("#### 🆚 Tableau comparatif")
@@ -255,10 +260,11 @@ def _display_comparison_table(comparison, best_offer_data):
             )
             # Convertir en string pour éviter les erreurs PyArrow avec les types mixtes
             df_compare = df_compare.astype(str)
-            st.dataframe(df_compare, use_container_width=True, hide_index=True)
+            st.dataframe(df_compare, width="stretch", hide_index=True)
 
         with st.expander("Voir les détails complets (JSON)", expanded=False):
             st.json(best_offer_data)
+
 
 def display_market_analysis(comparison):
     """Affiche les résultats d'une analyse de marché."""
@@ -281,6 +287,7 @@ def display_market_analysis(comparison):
     # Réponse complète
     with st.expander("📄 Réponse complète de l'IA"):
         st.json(full_result)
+
 
 def display_competitor_comparison(comparison):
     """Affiche les résultats d'une comparaison avec concurrent."""
@@ -380,6 +387,7 @@ def display_competitor_comparison(comparison):
     with st.expander("📄 Analyse complète de l'IA"):
         st.json(result)
 
+
 def handle_market_analysis(contract_service, contract_id):
     """Gère l'analyse de marché."""
     st.markdown("#### 📊 Analyse de marché")
@@ -401,6 +409,7 @@ def handle_market_analysis(contract_service, contract_id):
             except Exception as e:
                 st.error(f"❌ Erreur lors de l'analyse : {str(e)}")
                 st.exception(e)
+
 
 def handle_competitor_comparison(contract_service, contract_id):
     """Gère la comparaison avec un concurrent."""

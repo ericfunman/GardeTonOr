@@ -19,7 +19,13 @@ class TestCompareIntegration(unittest.TestCase):
     @patch("src.pages.compare_logic.st")
     @patch("src.pages.compare.st")
     def test_display_comparison_table_telephone(
-        self, mock_st, mock_st_logic, mock_contract_service_cls, mock_pdf_cls, mock_openai_cls, mock_get_db
+        self,
+        mock_st,
+        mock_st_logic,
+        mock_contract_service_cls,
+        mock_pdf_cls,
+        mock_openai_cls,
+        mock_get_db,
     ):
         # Setup mocks
         mock_contract_service = mock_contract_service_cls.return_value
@@ -79,7 +85,13 @@ class TestCompareIntegration(unittest.TestCase):
     @patch("src.pages.compare_logic.st")
     @patch("src.pages.compare.st")
     def test_display_comparison_table_pno(
-        self, mock_st, mock_st_logic, mock_contract_service_cls, mock_pdf_cls, mock_openai_cls, mock_get_db
+        self,
+        mock_st,
+        mock_st_logic,
+        mock_contract_service_cls,
+        mock_pdf_cls,
+        mock_openai_cls,
+        mock_get_db,
     ):
         mock_contract_service = mock_contract_service_cls.return_value
 
@@ -127,7 +139,13 @@ class TestCompareIntegration(unittest.TestCase):
     @patch("src.pages.compare_logic.st")
     @patch("src.pages.compare.st")
     def test_display_comparison_table_habitation(
-        self, mock_st, mock_st_logic, mock_contract_service_cls, mock_pdf_cls, mock_openai_cls, mock_get_db
+        self,
+        mock_st,
+        mock_st_logic,
+        mock_contract_service_cls,
+        mock_pdf_cls,
+        mock_openai_cls,
+        mock_get_db,
     ):
         mock_contract_service = mock_contract_service_cls.return_value
 
