@@ -237,6 +237,21 @@ def show():
             else:
                 st.info("Aucune comparaison effectuée pour le moment")
 
+        # Simulations
+        simulations = contract_service.get_all_simulations()
+        if simulations:
+            st.divider()
+            st.markdown("### 🧪 Simulations et Devis")
+            for sim in simulations:
+                with st.expander(
+                    f"{sim.provider} ({CONTRACT_TYPES.get(sim.contract_type, sim.contract_type)}) - {sim.anniversary_date.strftime('%d/%m/%Y')}"
+                ):
+                    st.json(sim.contract_data)
+                    if st.button("🗑️ Supprimer", key=f"del_sim_{sim.id}"):
+                        if contract_service.delete_contract(sim.id):
+                            st.success("Simulation supprimée")
+                            st.rerun()
+
 
 if __name__ == "__main__":
     show()

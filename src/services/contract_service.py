@@ -76,6 +76,7 @@ class ContractService:
         pdf_bytes: bytes,
         filename: str,
         end_date: Optional[datetime] = None,
+        is_simulation: bool = False,
     ) -> Contract:
         """
         Crée un nouveau contrat dans la base de données.
@@ -89,6 +90,7 @@ class ContractService:
             pdf_bytes: Contenu du PDF
             filename: Nom du fichier
             end_date: Date de fin (optionnel)
+            is_simulation: Si True, c'est une simulation/devis concurrent
 
         Returns:
             Contrat créé
@@ -103,6 +105,7 @@ class ContractService:
             pdf_content=pdf_bytes,
             original_filename=filename,
             validated=1,  # Validé après confirmation utilisateur
+            is_simulation=1 if is_simulation else 0,
         )
 
         self.db.add(contract)
@@ -112,8 +115,22 @@ class ContractService:
         return contract
 
     def get_all_contracts(self) -> List[Contract]:
-        """Récupère tous les contrats."""
-        return self.db.query(Contract).order_by(Contract.anniversary_date).all()
+        """Récupère tous les contrats réels (pas les simulations)."""
+        return (
+            self.db.query(Contract)
+            .filter(Contract.is_simulation == 0)
+            .order_by(Contract.anniversary_date)
+            .all()
+        )
+
+    def get_all_simulations(self) -> List[Contract]:
+        """Récupère toutes les simulations."""
+        return (
+            self.db.query(Contract)
+            .filter(Contract.is_simulation == 1)
+            .order_by(Contract.anniversary_date)
+            .all()
+        )
 
     def get_contract_by_id(self, contract_id: int) -> Optional[Contract]:
         """Récupère un contrat par son ID."""

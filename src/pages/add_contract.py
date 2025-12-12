@@ -747,6 +747,11 @@ def show():
                     "conditions_resiliation": conditions,
                 }
 
+            is_simulation = st.checkbox(
+                "Ceci est une simulation / devis concurrent (ne pas afficher dans mes contrats principaux)",
+                value=False,
+            )
+
             # Boutons de soumission
             col1, col2 = st.columns(2)
             with col1:
@@ -782,6 +787,7 @@ def show():
                                 },
                                 pdf_bytes=st.session_state["pdf_bytes"],
                                 filename=st.session_state["filename"],
+                                is_simulation=is_simulation,
                             )
 
                             # Création du contrat Gaz
@@ -802,6 +808,7 @@ def show():
                                 },
                                 pdf_bytes=st.session_state["pdf_bytes"],
                                 filename=st.session_state["filename"],
+                                is_simulation=is_simulation,
                             )
                             st.success(
                                 f"✅ 2 Contrats enregistrés avec succès ! (IDs: {contract_e.id}, {contract_g.id})"
@@ -830,6 +837,7 @@ def show():
                                 contract_data=validated_data,
                                 pdf_bytes=st.session_state["pdf_bytes"],
                                 filename=st.session_state["filename"],
+                                is_simulation=is_simulation,
                             )
 
                             st.success(f"✅ Contrat enregistré avec succès ! (ID: {contract.id})")

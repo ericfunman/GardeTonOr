@@ -39,6 +39,7 @@ class Contract(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     validated = Column(Integer, default=0)  # 0 = non validé, 1 = validé
+    is_simulation = Column(Integer, default=0)  # 0 = contrat réel, 1 = simulation/devis
 
     # Relations
     comparisons = relationship(

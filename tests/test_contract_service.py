@@ -248,3 +248,49 @@ class TestContractService:
         assert updated_contract is not None
         assert updated_contract.provider == "Free Mobile Updated"
         assert updated_contract.validated == 0
+
+    def test_get_all_simulations(self, db_session):
+        """Test de récupération des simulations."""
+        mock_openai = Mock()
+        mock_pdf = Mock()
+        service = ContractService(db_session, mock_openai, mock_pdf)
+
+        # Créer un contrat réel
+        service.create_contract(
+            contract_type="telephone",
+            provider="Real",
+            start_date=datetime.now(),
+            anniversary_date=datetime.now(),
+            contract_data={},
+            pdf_bytes=b"pdf",
+            filename="real.pdf",
+            is_simulation=False,
+        )
+
+        # Créer une simulation
+        service.create_contract(
+            contract_type="telephone",
+            provider="Simu",
+            start_date=datetime.now(),
+            anniversary_date=datetime.now(),
+            contract_data={},
+            pdf_bytes=b"pdf",
+            filename="simu.pdf",
+            is_simulation=True,
+        )
+
+        contracts = service.get_all_contracts()
+        simulations = service.get_all_simulations()
+
+        # Note: get_all_contracts might return existing sample contracts from fixtures if not isolated properly,
+        # but db_session should be clean or we check for existence.
+        # Actually, db_session is function scoped, so it might have data from other tests if not rolled back?
+        # No, pytest fixtures usually handle this.
+        # But wait, sample_contract_telephone fixture adds to session?
+        # This test doesn't use those fixtures, so it should be empty initially.
+
+        assert any(c.provider == "Real" for c in contracts)
+        assert not any(c.provider == "Simu" for c in contracts)
+
+        assert any(c.provider == "Simu" for c in simulations)
+        assert not any(c.provider == "Real" for c in simulations)

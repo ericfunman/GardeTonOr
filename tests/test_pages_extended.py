@@ -436,3 +436,40 @@ class TestDashboardPageExtended:
             assert (
                 found_provider
             ), "Le fournisseur 'Free Mobile' n'est pas affiché dans le dashboard"
+
+    def test_dashboard_simulations(self, db_session, sample_contract_data_telephone):
+        """Test l'affichage des simulations."""
+        from src.database.models import Contract
+
+        # Créer une simulation
+        simulation = Contract(
+            contract_type="telephone",
+            provider="SimuProvider",
+            start_date=datetime.now(),
+            anniversary_date=datetime.now(),
+            contract_data=sample_contract_data_telephone,
+            original_filename="simu.pdf",
+            is_simulation=1,
+        )
+        db_session.add(simulation)
+        db_session.commit()
+
+        at = AppTest.from_file("src/pages/dashboard.py")
+
+        with patch("src.database.get_db") as mock_get_db:
+            mock_get_db.side_effect = lambda: mock_get_db_context(db_session)
+            at.run(timeout=10)
+
+            # Vérifier que la section Simulations est présente
+            assert any("Simulations et Devis" in m.value for m in at.markdown)
+
+            # Vérifier que la simulation est affichée dans un expander
+            found_simu = False
+            for exp in at.expander:
+                if "SimuProvider" in exp.label:
+                    found_simu = True
+                    break
+
+            assert (
+                found_simu
+            ), "La simulation 'SimuProvider' n'est pas affichée dans les expanders"
