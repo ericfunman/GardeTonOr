@@ -94,7 +94,12 @@ def show():
         st.divider()
 
         # Liste de tous les contrats
-        st.markdown("### 📋 Tous vos contrats")
+        col_header, col_btn = st.columns([3, 1])
+        with col_header:
+            st.markdown("### 📋 Tous vos contrats")
+        with col_btn:
+            if st.button("➕ Ajouter un contrat", key="add_contract_top"):
+                st.switch_page("pages/add_contract.py")
 
         if not contracts:
             st.info("Aucun contrat enregistré. Commencez par ajouter un contrat !")
