@@ -64,6 +64,7 @@ page = st.sidebar.radio(
     "Aller à",
     ["🏠 Dashboard", "➕ Ajouter un contrat", "⚖️ Comparer", "📊 Historique"],
     label_visibility="collapsed",
+    key="navigation",
 )
 
 # Affichage des pages
