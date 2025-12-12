@@ -3,8 +3,8 @@ Page pour importer le contrat TotalEnergies
 """
 import streamlit as st
 from datetime import datetime
-from database.database import SessionLocal
-from database.models import Contract
+from src.database.database import SessionLocal
+from src.database.models import Contract
 
 st.set_page_config(page_title="Import TotalEnergies", page_icon="⚡", layout="wide")
 

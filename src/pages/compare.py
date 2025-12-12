@@ -393,6 +393,8 @@ def display_market_analysis(comparison):
             df_compare = pd.DataFrame(
                 rows, columns=["Caractéristique", "Mon Contrat", "Meilleure Offre Marché"]
             )
+            # Convertir en string pour éviter les erreurs PyArrow avec les types mixtes
+            df_compare = df_compare.astype(str)
             st.dataframe(df_compare, use_container_width=True, hide_index=True)
 
         with st.expander("Voir les détails complets (JSON)", expanded=False):
