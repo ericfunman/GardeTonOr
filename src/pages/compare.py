@@ -253,17 +253,19 @@ def display_market_analysis(comparison):
                         st.markdown("❌ " + ", ".join(offre["inconvenients"][:2]))
 
                 with col2:
-                    prix = (
-                        offre.get("prix_mensuel")
-                        or offre.get("prime_annuelle")
-                        or offre.get("cout_annuel_estime")
-                        or 0
-                    )
-                    unite = (
-                        "/mois"
-                        if offre.get("prix_mensuel") or offre.get("abonnement_mensuel")
-                        else "/an"
-                    )
+                    if offre.get("prix_mensuel"):
+                        prix = offre.get("prix_mensuel")
+                        unite = "/mois"
+                    elif offre.get("cout_annuel_estime"):
+                        prix = offre.get("cout_annuel_estime")
+                        unite = "/an"
+                    elif offre.get("prime_annuelle"):
+                        prix = offre.get("prime_annuelle")
+                        unite = "/an"
+                    else:
+                        prix = 0
+                        unite = ""
+
                     st.metric("Prix", f"{prix:.2f} €{unite}")
 
                 st.divider()
