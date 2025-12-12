@@ -1,5 +1,6 @@
 """Page de comparaison de contrats."""
 import streamlit as st
+import pandas as pd
 
 from src.database import get_db
 from src.services import OpenAIService, PDFService, ContractService
@@ -234,11 +235,133 @@ def display_market_analysis(comparison):
 
                 st.divider()
 
-    # Meilleure offre détaillée
+    # Tableau comparatif
     if best_offer_data:
-        st.markdown("#### 🏆 Meilleure offre détaillée")
-        st.info("Voici les détails de la meilleure offre trouvée, au format standardisé.")
-        with st.expander("Voir les détails (JSON)", expanded=False):
+        st.markdown("#### 🆚 Tableau comparatif")
+
+        current_data = comparison.contract.contract_data
+
+        # Helper to flatten/extract key values for comparison
+        def get_val(data, *keys):
+            res = data
+            for k in keys:
+                if isinstance(res, dict):
+                    res = res.get(k)
+                else:
+                    return None
+            return res
+
+        # Build comparison rows based on contract type
+        rows = []
+        c_type = comparison.contract.contract_type
+
+        if c_type == "electricite":
+            rows = [
+                (
+                    "Fournisseur",
+                    get_val(current_data, "fournisseur"),
+                    get_val(best_offer_data, "fournisseur"),
+                ),
+                (
+                    "Abonnement (€/mois)",
+                    get_val(current_data, "electricite", "tarifs", "abonnement_mensuel_ttc")
+                    or get_val(current_data, "prix_abonnement_mensuel"),
+                    get_val(best_offer_data, "electricite", "tarifs", "abonnement_mensuel_ttc")
+                    or get_val(best_offer_data, "prix_abonnement_mensuel"),
+                ),
+                (
+                    "Prix kWh (€)",
+                    get_val(current_data, "electricite", "tarifs", "prix_kwh_ttc")
+                    or get_val(current_data, "prix_kwh", "base"),
+                    get_val(best_offer_data, "electricite", "tarifs", "prix_kwh_ttc")
+                    or get_val(best_offer_data, "prix_kwh", "base"),
+                ),
+                (
+                    "Coût annuel estimé (€)",
+                    get_val(current_data, "electricite", "budget_annuel_estime_ttc")
+                    or get_val(current_data, "estimation_facture_annuelle"),
+                    get_val(best_offer_data, "electricite", "budget_annuel_estime_ttc")
+                    or get_val(best_offer_data, "estimation_facture_annuelle"),
+                ),
+            ]
+        elif c_type == "gaz":
+            rows = [
+                (
+                    "Fournisseur",
+                    get_val(current_data, "fournisseur"),
+                    get_val(best_offer_data, "fournisseur"),
+                ),
+                (
+                    "Abonnement (€/mois)",
+                    get_val(current_data, "gaz", "tarifs", "abonnement_mensuel_ttc")
+                    or get_val(current_data, "prix_abonnement_mensuel"),
+                    get_val(best_offer_data, "gaz", "tarifs", "abonnement_mensuel_ttc")
+                    or get_val(best_offer_data, "prix_abonnement_mensuel"),
+                ),
+                (
+                    "Prix kWh (€)",
+                    get_val(current_data, "gaz", "tarifs", "prix_kwh_ttc")
+                    or get_val(current_data, "prix_kwh"),
+                    get_val(best_offer_data, "gaz", "tarifs", "prix_kwh_ttc")
+                    or get_val(best_offer_data, "prix_kwh"),
+                ),
+                (
+                    "Coût annuel estimé (€)",
+                    get_val(current_data, "gaz", "budget_annuel_estime_ttc")
+                    or get_val(current_data, "estimation_facture_annuelle"),
+                    get_val(best_offer_data, "gaz", "budget_annuel_estime_ttc")
+                    or get_val(best_offer_data, "estimation_facture_annuelle"),
+                ),
+            ]
+        elif c_type == "telephone":
+            rows = [
+                (
+                    "Fournisseur",
+                    get_val(current_data, "fournisseur"),
+                    get_val(best_offer_data, "fournisseur"),
+                ),
+                (
+                    "Forfait",
+                    get_val(current_data, "forfait_nom"),
+                    get_val(best_offer_data, "forfait_nom"),
+                ),
+                (
+                    "Data (Go)",
+                    get_val(current_data, "data_go"),
+                    get_val(best_offer_data, "data_go"),
+                ),
+                (
+                    "Prix mensuel (€)",
+                    get_val(current_data, "prix_mensuel"),
+                    get_val(best_offer_data, "prix_mensuel"),
+                ),
+            ]
+        elif c_type == "assurance_pno":
+            rows = [
+                (
+                    "Assureur",
+                    get_val(current_data, "assureur"),
+                    get_val(best_offer_data, "assureur"),
+                ),
+                (
+                    "Prime annuelle (€)",
+                    get_val(current_data, "prime_annuelle"),
+                    get_val(best_offer_data, "prime_annuelle"),
+                ),
+                (
+                    "Franchise (€)",
+                    get_val(current_data, "franchise"),
+                    get_val(best_offer_data, "franchise"),
+                ),
+            ]
+
+        if rows:
+            df_compare = pd.DataFrame(
+                rows, columns=["Caractéristique", "Mon Contrat", "Meilleure Offre Marché"]
+            )
+            st.dataframe(df_compare, use_container_width=True, hide_index=True)
+
+        with st.expander("Voir les détails complets (JSON)", expanded=False):
             st.json(best_offer_data)
 
     # Réponse complète
