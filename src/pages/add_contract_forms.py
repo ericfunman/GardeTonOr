@@ -26,7 +26,7 @@ def parse_date(date_str):
 def render_dual_energy_form(extracted_data):
     """Renders the form for dual energy contracts (Electricity + Gas)."""
     tab_elec, tab_gaz = st.tabs(["⚡ Électricité", "🔥 Gaz"])
-    
+
     data_elec = {}
     data_gaz = {}
 
@@ -48,10 +48,7 @@ def render_dual_energy_form(extracted_data):
             data_elec["puissance"] = st.number_input(
                 "Puissance (kVA)",
                 value=float(
-                    extracted_data.get("electricite", {}).get(
-                        "puissance_souscrite_kva", 0
-                    )
-                    or 0
+                    extracted_data.get("electricite", {}).get("puissance_souscrite_kva", 0) or 0
                 ),
                 min_value=0.0,
                 key="puis_dual",
@@ -83,9 +80,7 @@ def render_dual_energy_form(extracted_data):
             data_elec["prix_kwh"] = st.number_input(
                 LABEL_PRICE_KWH,
                 value=float(
-                    extracted_data.get("electricite", {})
-                    .get("tarifs", {})
-                    .get("prix_kwh_ttc", 0)
+                    extracted_data.get("electricite", {}).get("tarifs", {}).get("prix_kwh_ttc", 0)
                     or 0
                 ),
                 min_value=0.0,
@@ -128,9 +123,7 @@ def render_dual_energy_form(extracted_data):
             data_gaz["prix_abo"] = st.number_input(
                 LABEL_MONTHLY_SUB,
                 value=float(
-                    extracted_data.get("gaz", {})
-                    .get("tarifs", {})
-                    .get("abonnement_mensuel_ttc", 0)
+                    extracted_data.get("gaz", {}).get("tarifs", {}).get("abonnement_mensuel_ttc", 0)
                     or 0
                 ),
                 min_value=0.0,
@@ -152,10 +145,7 @@ def render_dual_energy_form(extracted_data):
             data_gaz["prix_kwh"] = st.number_input(
                 LABEL_PRICE_KWH,
                 value=float(
-                    extracted_data.get("gaz", {})
-                    .get("tarifs", {})
-                    .get("prix_kwh_ttc", 0)
-                    or 0
+                    extracted_data.get("gaz", {}).get("tarifs", {}).get("prix_kwh_ttc", 0) or 0
                 ),
                 min_value=0.0,
                 step=0.0001,
@@ -165,15 +155,12 @@ def render_dual_energy_form(extracted_data):
             data_gaz["conso_annuelle"] = st.number_input(
                 "Conso annuelle estimée (kWh)",
                 value=float(
-                    extracted_data.get("gaz", {}).get(
-                        "consommation_estimee_annuelle_kwh", 0
-                    )
-                    or 0
+                    extracted_data.get("gaz", {}).get("consommation_estimee_annuelle_kwh", 0) or 0
                 ),
                 min_value=0.0,
                 key="conso_g_dual",
             )
-            
+
     return data_elec, data_gaz
 
 
@@ -182,12 +169,8 @@ def render_telephone_form(extracted_data):
     col1, col2 = st.columns(2)
 
     with col1:
-        provider = st.text_input(
-            "Fournisseur", value=extracted_data.get("fournisseur", "")
-        )
-        forfait_nom = st.text_input(
-            "Nom du forfait", value=extracted_data.get("forfait_nom", "")
-        )
+        provider = st.text_input("Fournisseur", value=extracted_data.get("fournisseur", ""))
+        forfait_nom = st.text_input("Nom du forfait", value=extracted_data.get("forfait_nom", ""))
         data_go = st.number_input(
             "Data (Go)", value=float(extracted_data.get("data_go", 0)), min_value=0.0
         )
@@ -199,9 +182,7 @@ def render_telephone_form(extracted_data):
         )
 
     with col2:
-        minutes = st.text_input(
-            "Minutes", value=str(extracted_data.get("minutes", "illimité"))
-        )
+        minutes = st.text_input("Minutes", value=str(extracted_data.get("minutes", "illimité")))
         sms = st.text_input("SMS", value=str(extracted_data.get("sms", "illimité")))
         engagement_mois = st.number_input(
             "Engagement (mois)",
@@ -218,9 +199,7 @@ def render_telephone_form(extracted_data):
             value=parse_date(extracted_data.get("date_anniversaire")),
         )
 
-    options = st.text_area(
-        "Options incluses", value="\n".join(extracted_data.get("options", []))
-    )
+    options = st.text_area("Options incluses", value="\n".join(extracted_data.get("options", [])))
     conditions = st.text_area(
         "Conditions particulières",
         value=extracted_data.get("conditions_particulieres", ""),
@@ -304,9 +283,7 @@ def render_insurance_pno_form(extracted_data):
             min_value=0.0,
         )
     with col2:
-        vol = st.number_input(
-            "Vol (€)", value=float(garanties.get("vol", 0)), min_value=0.0
-        )
+        vol = st.number_input("Vol (€)", value=float(garanties.get("vol", 0)), min_value=0.0)
         rc = st.number_input(
             "Responsabilité civile (€)",
             value=float(garanties.get("responsabilite_civile", 0)),
@@ -355,9 +332,7 @@ def render_insurance_habitation_form(extracted_data):
         st.markdown("**Bien assuré**")
         bien = extracted_data.get("bien_assure", {})
         adresse = st.text_input("Adresse", value=bien.get("adresse", ""))
-        type_bien = st.text_input(
-            "Type de logement", value=bien.get("type_logement", "")
-        )
+        type_bien = st.text_input("Type de logement", value=bien.get("type_logement", ""))
         surface_m2 = st.number_input(
             "Surface (m²)", value=float(bien.get("surface_m2", 0) or 0), min_value=0.0
         )
@@ -374,9 +349,7 @@ def render_insurance_habitation_form(extracted_data):
             piscine = st.checkbox("Piscine", value=bien.get("piscine", False))
         with col_eq2:
             veranda = st.checkbox("Véranda", value=bien.get("veranda", False))
-            dependances = st.checkbox(
-                "Dépendances", value=bien.get("dependances", False)
-            )
+            dependances = st.checkbox("Dépendances", value=bien.get("dependances", False))
 
     with col2:
         tarifs = extracted_data.get("tarifs", {})
@@ -403,7 +376,9 @@ def render_insurance_habitation_form(extracted_data):
 
         dates = extracted_data.get("dates", {})
         date_effet = st.date_input("Date d'effet", value=parse_date(dates.get("date_debut")))
-        date_anniversaire = st.date_input(LABEL_ANNIVERSARY_DATE, value=parse_date(dates.get("date_anniversaire")))
+        date_anniversaire = st.date_input(
+            LABEL_ANNIVERSARY_DATE, value=parse_date(dates.get("date_anniversaire"))
+        )
 
     st.markdown("**Garanties incluses**")
     garanties_list = extracted_data.get("garanties_incluses", [])
@@ -452,15 +427,11 @@ def render_electricity_form(extracted_data):
     col1, col2 = st.columns(2)
 
     with col1:
-        provider = st.text_input(
-            "Fournisseur", value=extracted_data.get("fournisseur", "")
-        )
+        provider = st.text_input("Fournisseur", value=extracted_data.get("fournisseur", ""))
         numero_contrat = st.text_input(
             "Numéro de contrat", value=extracted_data.get("numero_contrat", "")
         )
-        type_offre = st.text_input(
-            "Type d'offre", value=elec_data.get("option_tarifaire", "")
-        )
+        type_offre = st.text_input("Type d'offre", value=elec_data.get("option_tarifaire", ""))
         puissance_kva = st.number_input(
             "Puissance souscrite (kVA)",
             value=float(elec_data.get("puissance_souscrite_kva") or 0),
@@ -524,8 +495,7 @@ def render_electricity_form(extracted_data):
         "date_debut": date_debut.strftime("%Y-%m-%d"),
         "date_anniversaire": date_anniversaire.strftime("%Y-%m-%d"),
         "estimation_conso_annuelle_kwh": conso_annuelle,
-        "estimation_facture_annuelle": (prix_abo * 12)
-        + (prix_kwh_base * conso_annuelle),
+        "estimation_facture_annuelle": (prix_abo * 12) + (prix_kwh_base * conso_annuelle),
         "conditions_resiliation": conditions,
     }
 
@@ -540,15 +510,11 @@ def render_gas_form(extracted_data):
     col1, col2 = st.columns(2)
 
     with col1:
-        provider = st.text_input(
-            "Fournisseur", value=extracted_data.get("fournisseur", "")
-        )
+        provider = st.text_input("Fournisseur", value=extracted_data.get("fournisseur", ""))
         numero_contrat = st.text_input(
             "Numéro de contrat", value=extracted_data.get("numero_contrat", "")
         )
-        type_offre = st.text_input(
-            "Type d'offre", value=gaz_data.get("option_tarifaire", "")
-        )
+        type_offre = st.text_input("Type d'offre", value=gaz_data.get("option_tarifaire", ""))
         classe_conso = st.text_input(
             "Classe de consommation",
             value=gaz_data.get("option_tarifaire", "Base"),

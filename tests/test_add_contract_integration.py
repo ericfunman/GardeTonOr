@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import MagicMock, patch
-import streamlit as st
 from src.pages import add_contract
+
 
 class TestAddContractIntegration(unittest.TestCase):
     def setUp(self):
@@ -9,7 +9,7 @@ class TestAddContractIntegration(unittest.TestCase):
         self.mock_openai_service = MagicMock()
         self.mock_pdf_service = MagicMock()
         self.mock_contract_service = MagicMock()
-        
+
         # Setup session state
         pass
 
@@ -17,18 +17,23 @@ class TestAddContractIntegration(unittest.TestCase):
     @patch("src.pages.add_contract.OpenAIService")
     @patch("src.pages.add_contract.PDFService")
     @patch("src.pages.add_contract.ContractService")
-    def test_handle_extraction(self, mock_contract_service_cls, mock_pdf_cls, mock_openai_cls, mock_get_db):
+    def test_handle_extraction(
+        self, mock_contract_service_cls, mock_pdf_cls, mock_openai_cls, mock_get_db
+    ):
         # Setup mocks
         mock_contract_service = mock_contract_service_cls.return_value
-        mock_contract_service.extract_and_create_contract.return_value = ({"some": "data"}, "pdf_bytes")
-        
+        mock_contract_service.extract_and_create_contract.return_value = (
+            {"some": "data"},
+            "pdf_bytes",
+        )
+
         mock_file = MagicMock()
         mock_file.name = "test.pdf"
         mock_file.read.return_value = b"pdf_content"
-        
+
         # Execute
         data, pdf_bytes = add_contract.handle_extraction(mock_file, "electricite")
-        
+
         # Verify
         mock_contract_service.extract_and_create_contract.assert_called_once()
         self.assertEqual(data, {"some": "data"})
@@ -41,24 +46,24 @@ class TestAddContractIntegration(unittest.TestCase):
         mock_st.file_uploader.return_value = MagicMock(name="uploaded_file")
         mock_st.selectbox.return_value = "electricite"
         mock_st.button.return_value = True  # Click extraction button
-        mock_st.form_submit_button.return_value = False # Don't submit the form
+        mock_st.form_submit_button.return_value = False  # Don't submit the form
         mock_st.columns.return_value = [MagicMock(), MagicMock()]
-        
+
         # Mock session_state as a dict
         mock_st.session_state = {}
-        
+
         mock_handle_extraction.return_value = ({"extracted": "data"}, b"pdf_bytes")
-        
+
         # Execute
         add_contract.show()
-        
+
         # Verify extraction was called
         mock_handle_extraction.assert_called_once()
-        
+
         # Check for errors
         if mock_st.error.called:
             print(f"st.error called with: {mock_st.error.call_args}")
-        
+
         # Verify session state was updated
         self.assertIn("extracted_data", mock_st.session_state)
         self.assertEqual(mock_st.session_state["extracted_data"], {"extracted": "data"})
@@ -71,18 +76,15 @@ class TestAddContractIntegration(unittest.TestCase):
         mock_st.session_state = {
             "extraction_done": True,
             "contract_type": "auto",
-            "extracted_data": {
-                "electricite": {"pdl": "123"},
-                "gaz": None
-            },
+            "extracted_data": {"electricite": {"pdl": "123"}, "gaz": None},
             "filename": "test.pdf",
-            "pdf_bytes": b"bytes"
+            "pdf_bytes": b"bytes",
         }
         mock_st.columns.return_value = [MagicMock(), MagicMock()]
-        
+
         # Execute
         add_contract.show()
-        
+
         # Verify that it detected electricity
         mock_st.success.assert_any_call("✨ Contrat d'électricité détecté")
 
@@ -95,13 +97,13 @@ class TestAddContractIntegration(unittest.TestCase):
             "contract_type": "electricite",
             "extracted_data": {"some": "data"},
             "filename": "test.pdf",
-            "pdf_bytes": b"bytes"
+            "pdf_bytes": b"bytes",
         }
         mock_st.columns.return_value = [MagicMock(), MagicMock()]
-        
+
         # Execute
         add_contract.show()
-        
+
         # Verify render function was called
         mock_render.assert_called_once()
 
@@ -113,7 +115,7 @@ class TestAddContractIntegration(unittest.TestCase):
             "contract_type": "gaz",
             "extracted_data": {"some": "data"},
             "filename": "test.pdf",
-            "pdf_bytes": b"bytes"
+            "pdf_bytes": b"bytes",
         }
         mock_st.columns.return_value = [MagicMock(), MagicMock()]
         add_contract.show()
@@ -127,12 +129,12 @@ class TestAddContractIntegration(unittest.TestCase):
             "contract_type": "electricite_gaz",
             "extracted_data": {"some": "data"},
             "filename": "test.pdf",
-            "pdf_bytes": b"bytes"
+            "pdf_bytes": b"bytes",
         }
         mock_st.columns.return_value = [MagicMock(), MagicMock()]
         # Mock return value for unpacking
         mock_render.return_value = ({"elec": "data"}, {"gaz": "data"})
-        
+
         add_contract.show()
         mock_render.assert_called_once()
 
@@ -144,7 +146,7 @@ class TestAddContractIntegration(unittest.TestCase):
             "contract_type": "telephone",
             "extracted_data": {"some": "data"},
             "filename": "test.pdf",
-            "pdf_bytes": b"bytes"
+            "pdf_bytes": b"bytes",
         }
         mock_st.columns.return_value = [MagicMock(), MagicMock()]
         add_contract.show()
@@ -158,7 +160,7 @@ class TestAddContractIntegration(unittest.TestCase):
             "contract_type": "assurance_habitation",
             "extracted_data": {"some": "data"},
             "filename": "test.pdf",
-            "pdf_bytes": b"bytes"
+            "pdf_bytes": b"bytes",
         }
         mock_st.columns.return_value = [MagicMock(), MagicMock()]
         add_contract.show()
@@ -172,7 +174,7 @@ class TestAddContractIntegration(unittest.TestCase):
             "contract_type": "assurance_pno",
             "extracted_data": {"some": "data"},
             "filename": "test.pdf",
-            "pdf_bytes": b"bytes"
+            "pdf_bytes": b"bytes",
         }
         mock_st.columns.return_value = [MagicMock(), MagicMock()]
         add_contract.show()
