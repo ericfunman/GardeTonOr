@@ -193,7 +193,12 @@ def display_market_analysis(comparison):
 
     col1, col2, col3 = st.columns(3)
 
-    tarif_actuel = result.get("tarif_actuel") or result.get("prime_actuelle_annuelle", 0)
+    tarif_actuel = (
+        result.get("tarif_actuel")
+        or result.get("prime_actuelle_annuelle")
+        or result.get("cout_annuel_actuel")
+        or 0
+    )
     estimation = result.get("estimation_marche", {})
     economie_mensuelle = result.get("economie_potentielle_mensuelle", 0)
     economie_annuelle = result.get("economie_potentielle_annuelle", 0)
@@ -202,7 +207,12 @@ def display_market_analysis(comparison):
         st.metric("Tarif actuel", f"{tarif_actuel:.2f} €")
 
     with col2:
-        tarif_moyen = estimation.get("tarif_moyen") or estimation.get("prime_moyenne", 0)
+        tarif_moyen = (
+            estimation.get("tarif_moyen")
+            or estimation.get("prime_moyenne")
+            or estimation.get("cout_moyen")
+            or 0
+        )
         delta = tarif_actuel - tarif_moyen if tarif_moyen else 0
         st.metric(
             "Tarif moyen marché",
@@ -235,7 +245,7 @@ def display_market_analysis(comparison):
 
                 with col1:
                     st.markdown(f"**{offre.get('fournisseur') or offre.get('assureur')}**")
-                    st.caption(offre.get("forfait", ""))
+                    st.caption(offre.get("forfait") or offre.get("offre") or "")
 
                     if offre.get("avantages"):
                         st.markdown("✅ " + ", ".join(offre["avantages"][:3]))
@@ -243,8 +253,17 @@ def display_market_analysis(comparison):
                         st.markdown("❌ " + ", ".join(offre["inconvenients"][:2]))
 
                 with col2:
-                    prix = offre.get("prix_mensuel") or offre.get("prime_annuelle", 0)
-                    unite = "/mois" if offre.get("prix_mensuel") else "/an"
+                    prix = (
+                        offre.get("prix_mensuel")
+                        or offre.get("prime_annuelle")
+                        or offre.get("cout_annuel_estime")
+                        or 0
+                    )
+                    unite = (
+                        "/mois"
+                        if offre.get("prix_mensuel") or offre.get("abonnement_mensuel")
+                        else "/an"
+                    )
                     st.metric("Prix", f"{prix:.2f} €{unite}")
 
                 st.divider()

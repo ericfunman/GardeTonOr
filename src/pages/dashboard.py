@@ -107,7 +107,7 @@ def show():
             st.markdown("### 📋 Tous vos contrats")
         with col_btn:
             def _go_to_add_contract():
-                st.session_state["navigation"] = "➕ Ajouter un contrat"
+                st.session_state["navigation"] = "📥 Importer un contrat"
 
             st.button(
                 "➕ Ajouter un contrat",

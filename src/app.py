@@ -62,7 +62,13 @@ st.divider()
 st.sidebar.title("📋 Navigation")
 page = st.sidebar.radio(
     "Aller à",
-    ["🏠 Dashboard", "➕ Ajouter un contrat", "⚖️ Comparer", "📊 Historique"],
+    [
+        "🏠 Dashboard",
+        "📥 Importer un contrat",
+        "⚖️ Comparer",
+        "📜 Historique",
+        "👀 Visualisation des contrats",
+    ],
     label_visibility="collapsed",
     key="navigation",
 )
@@ -72,7 +78,7 @@ if page == "🏠 Dashboard":
     from src.pages import dashboard
 
     dashboard.show()
-elif page == "➕ Ajouter un contrat":
+elif page == "📥 Importer un contrat":
     from src.pages import add_contract
 
     add_contract.show()
@@ -80,10 +86,15 @@ elif page == "⚖️ Comparer":
     from src.pages import compare
 
     compare.show()
-elif page == "📊 Historique":
+elif page == "📜 Historique":
     from src.pages import history
 
     history.show()
+elif page == "👀 Visualisation des contrats":
+    # Réutiliser le dashboard pour l'instant ou créer une vue spécifique
+    from src.pages import dashboard
+
+    dashboard.show()
 
 # Footer
 st.sidebar.divider()
