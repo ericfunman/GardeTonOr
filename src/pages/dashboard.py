@@ -85,7 +85,15 @@ def show():
                 with col3:
                     if st.button("🔍 Comparer", key=f"compare_{contract.id}"):
                         st.session_state["compare_contract_id"] = contract.id
+                        st.session_state["navigation"] = "⚖️ Comparer"
                         st.rerun()
+                    
+                    if st.button("🗑️ Supprimer", key=f"delete_{contract.id}"):
+                        if contract_service.delete_contract(contract.id):
+                            st.success("Contrat supprimé !")
+                            st.rerun()
+                        else:
+                            st.error("Erreur lors de la suppression")
 
                 st.divider()
         else:

@@ -49,8 +49,13 @@ def show():
 
         if selected_contract:
             # Afficher les détails du contrat
+            # On copie les données nécessaires pour éviter les erreurs de session détachée
+            contract_data = selected_contract.contract_data
+            contract_id = selected_contract.id
+            contract_type = selected_contract.contract_type
+            
             with st.expander("📄 Détails du contrat", expanded=False):
-                st.json(selected_contract.contract_data)
+                st.json(contract_data)
 
             st.divider()
 
@@ -74,7 +79,7 @@ def show():
                 if st.button("🚀 Lancer l'analyse", type="primary", use_container_width=True):
                     with st.spinner("Analyse en cours... (cela peut prendre 30 secondes)"):
                         try:
-                            comparison = contract_service.compare_with_market(selected_contract.id)
+                            comparison = contract_service.compare_with_market(contract_id)
 
                             st.success("✅ Analyse terminée !")
 
@@ -106,7 +111,7 @@ def show():
                                 competitor_bytes = competitor_file.read()
 
                                 comparison = contract_service.compare_with_competitor(
-                                    contract_id=selected_contract.id,
+                                    contract_id=contract_id,
                                     competitor_pdf_bytes=competitor_bytes,
                                     competitor_filename=competitor_file.name,
                                 )
@@ -124,7 +129,7 @@ def show():
             st.divider()
             st.markdown("### 📜 Historique des comparaisons")
 
-            comparisons = contract_service.get_contract_comparisons(selected_contract.id)
+            comparisons = contract_service.get_contract_comparisons(contract_id)
 
             if comparisons:
                 for i, comp in enumerate(comparisons):
