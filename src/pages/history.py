@@ -12,7 +12,7 @@ def _calculate_savings(comp):
     # Helper to extract savings from comparison result
     if not comp.comparison_result:
         return 0
-    
+
     market_analysis = comp.comparison_result.get("analyse", {})
     if not isinstance(market_analysis, dict):
         market_analysis = {}
@@ -32,9 +32,7 @@ def _display_global_stats(comparisons):
 
     total_comparisons = len(comparisons)
     market_analyses = sum(1 for c in comparisons if c.comparison_type == "market_analysis")
-    competitor_comparisons = sum(
-        1 for c in comparisons if c.comparison_type == "competitor_quote"
-    )
+    competitor_comparisons = sum(1 for c in comparisons if c.comparison_type == "competitor_quote")
 
     total_savings = sum(_calculate_savings(c) for c in comparisons)
 
@@ -80,7 +78,7 @@ def _filter_comparisons(comparisons, contract_service):
         filtered_comparisons = [
             c for c in filtered_comparisons if c.contract.provider == selected_contract_name
         ]
-    
+
     st.divider()
     return filtered_comparisons
 
@@ -95,7 +93,7 @@ def _display_analysis_table(filtered_comparisons):
     for comp in filtered_comparisons:
         type_label = "📊 Marché" if comp.comparison_type == "market_analysis" else "🆚 Concurrent"
         economie = _calculate_savings(comp)
-        
+
         recommandation = ""
         if comp.comparison_result:
             market_analysis = comp.comparison_result.get("analyse", {})
@@ -164,10 +162,7 @@ def _display_charts(filtered_comparisons):
 
     if savings_by_contract:
         df_savings = pd.DataFrame(
-            [
-                {"Contrat": k, LABEL_TOTAL_ECONOMY_YEAR: v}
-                for k, v in savings_by_contract.items()
-            ]
+            [{"Contrat": k, LABEL_TOTAL_ECONOMY_YEAR: v} for k, v in savings_by_contract.items()]
         )
         fig2 = px.bar(
             df_savings,
@@ -218,7 +213,7 @@ def show():
 
         _display_global_stats(comparisons)
         filtered_comparisons = _filter_comparisons(comparisons, contract_service)
-        
+
         if _display_analysis_table(filtered_comparisons):
             _display_charts(filtered_comparisons)
             _display_details(filtered_comparisons)
