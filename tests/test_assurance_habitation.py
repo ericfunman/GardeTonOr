@@ -3,6 +3,7 @@ from unittest.mock import MagicMock
 import json
 from src.services.openai_service import OpenAIService
 
+
 class TestAssuranceHabitation:
     @pytest.fixture
     def openai_service(self):
@@ -51,14 +52,14 @@ class TestAssuranceHabitation:
                 "date_anniversaire": "01/01/2025"
             }
         })
-        
+
         # Setup mock client
         openai_service.client.chat.completions.create.return_value = mock_response
 
         # Test extraction
         pdf_text = "Contrat habitation Maif..."
         result = openai_service.extract_contract_data(pdf_text, "assurance_habitation")
-        
+
         data = result["data"]
         assert data["type_contrat"] == "assurance_habitation"
         assert data["assureur"] == "Maif"
@@ -87,7 +88,7 @@ class TestAssuranceHabitation:
             },
             "meilleure_offre": {}
         })
-        
+
         openai_service.client.chat.completions.create.return_value = mock_response
 
         contract_data = {
@@ -95,8 +96,8 @@ class TestAssuranceHabitation:
             "assureur": "Maif",
             "tarifs": {"prime_annuelle_ttc": 450.50}
         }
-        
+
         result = openai_service.compare_with_market(contract_data, "assurance_habitation")
-        
+
         assert result["analysis"]["analyse"]["prime_actuelle_annuelle"] == 450.50
         assert "Vérifier la garantie piscine" in result["analysis"]["analyse"]["points_attention"]

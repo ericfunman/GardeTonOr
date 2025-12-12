@@ -164,9 +164,9 @@ class ContractService:
         # Gérer la structure imbriquée "analyse" pour les analyses de marché
         analysis_data = comparison_result["analysis"]
         recommandation = analysis_data.get("recommandation", "")
-        
+
         if "analyse" in analysis_data and isinstance(analysis_data["analyse"], dict):
-             recommandation = analysis_data["analyse"].get("recommandation", recommandation)
+            recommandation = analysis_data["analyse"].get("recommandation", recommandation)
 
         comparison = Comparison(
             contract_id=contract_id,
