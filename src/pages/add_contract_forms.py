@@ -69,7 +69,7 @@ def render_dual_energy_form(extracted_data):
         with col2_e:
             data_elec["date_debut"] = st.date_input(
                 "Date de début (Elec)",
-                value=datetime.now(),  # TODO: Parse date properly if available
+                value=datetime.now(),
                 key="date_deb_e_dual",
             )
             data_elec["date_anniv"] = st.date_input(

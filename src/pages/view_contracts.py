@@ -5,82 +5,65 @@ from src.services import ContractService, OpenAIService, PDFService
 from src.config import CONTRACT_TYPES
 
 
-def show():
-    """Affiche la page de visualisation des contrats."""
-    st.title("👀 Visualisation des contrats")
-    st.markdown("Consultez les détails de vos contrats enregistrés.")
+def _get_selected_contract_id(contracts):
+    # Sélection du contrat
+    contract_options = {
+        c.id: f"{CONTRACT_TYPES.get(c.contract_type, c.contract_type)} - {c.provider} ({c.anniversary_date.strftime('%d/%m/%Y')})"
+        for c in contracts
+    }
 
-    with get_db() as db:
-        openai_service = OpenAIService()
-        pdf_service = PDFService()
-        contract_service = ContractService(db, openai_service, pdf_service)
+    # Gestion de la pré-sélection depuis le dashboard
+    default_index = 0
+    contract_ids = list(contract_options.keys())
 
-        contracts = contract_service.get_all_contracts()
+    if "view_contract_id" in st.session_state:
+        try:
+            default_index = contract_ids.index(st.session_state["view_contract_id"])
+            # On ne supprime pas forcément la variable pour garder la sélection si on rafraîchit
+            # del st.session_state["view_contract_id"]
+        except ValueError:
+            pass
 
-        if not contracts:
-            st.info("Aucun contrat enregistré.")
-            return
+    selected_id = st.selectbox(
+        "Choisir un contrat à visualiser",
+        options=contract_ids,
+        format_func=lambda x: contract_options[x],
+        index=default_index,
+    )
+    return selected_id
 
-        # Sélection du contrat
-        contract_options = {
-            c.id: f"{CONTRACT_TYPES.get(c.contract_type, c.contract_type)} - {c.provider} ({c.anniversary_date.strftime('%d/%m/%Y')})"
-            for c in contracts
-        }
 
-        # Gestion de la pré-sélection depuis le dashboard
-        default_index = 0
-        contract_ids = list(contract_options.keys())
-
-        if "view_contract_id" in st.session_state:
-            try:
-                default_index = contract_ids.index(st.session_state["view_contract_id"])
-                # On ne supprime pas forcément la variable pour garder la sélection si on rafraîchit
-                # del st.session_state["view_contract_id"]
-            except ValueError:
-                pass
-
-        selected_id = st.selectbox(
-            "Choisir un contrat à visualiser",
-            options=contract_ids,
-            format_func=lambda x: contract_options[x],
-            index=default_index,
+def _display_contract_header(contract):
+    st.divider()
+    # En-tête du contrat
+    col1, col2 = st.columns([2, 1])
+    with col1:
+        st.subheader(f"{contract.provider}")
+        st.caption(
+            f"Type: {CONTRACT_TYPES.get(contract.contract_type, contract.contract_type)}"
         )
+    with col2:
+        st.metric("Date anniversaire", contract.anniversary_date.strftime("%d/%m/%Y"))
 
-        if selected_id:
-            contract = contract_service.get_contract_by_id(selected_id)
-            if not contract:
-                st.error("Contrat introuvable.")
-                return
 
-            st.divider()
+def _display_contract_details(contract):
+    # Affichage spécifique selon le type
+    data = contract.contract_data
 
-            # En-tête du contrat
-            col1, col2 = st.columns([2, 1])
-            with col1:
-                st.subheader(f"{contract.provider}")
-                st.caption(
-                    f"Type: {CONTRACT_TYPES.get(contract.contract_type, contract.contract_type)}"
-                )
-            with col2:
-                st.metric("Date anniversaire", contract.anniversary_date.strftime("%d/%m/%Y"))
+    if contract.contract_type == "assurance_habitation":
+        display_assurance_habitation(data)
+    elif contract.contract_type == "assurance_pno":
+        display_assurance_pno(data)
+    elif contract.contract_type == "telephone":
+        display_telephone(data)
+    elif contract.contract_type in ["electricite", "gaz"]:
+        display_energy(data, contract.contract_type)
+    else:
+        st.json(data)
 
-            # Affichage spécifique selon le type
-            data = contract.contract_data
-
-            if contract.contract_type == "assurance_habitation":
-                display_assurance_habitation(data)
-            elif contract.contract_type == "assurance_pno":
-                display_assurance_pno(data)
-            elif contract.contract_type == "telephone":
-                display_telephone(data)
-            elif contract.contract_type in ["electricite", "gaz"]:
-                display_energy(data, contract.contract_type)
-            else:
-                st.json(data)
-
-            # Données brutes (toujours utile pour vérifier)
-            with st.expander("Voir les données brutes (JSON)"):
-                st.json(data)
+    # Données brutes (toujours utile pour vérifier)
+    with st.expander("Voir les données brutes (JSON)"):
+        st.json(data)
 
 
 def display_assurance_habitation(data):
@@ -245,6 +228,34 @@ def display_energy(data, type_energy):
                 kwh = legacy_kwh
 
         st.markdown(f"**Prix kWh:** {kwh:.4f} €" if kwh is not None else "**Prix kWh:** N/A")
+
+
+def show():
+    """Affiche la page de visualisation des contrats."""
+    st.title("👀 Visualisation des contrats")
+    st.markdown("Consultez les détails de vos contrats enregistrés.")
+
+    with get_db() as db:
+        openai_service = OpenAIService()
+        pdf_service = PDFService()
+        contract_service = ContractService(db, openai_service, pdf_service)
+
+        contracts = contract_service.get_all_contracts()
+
+        if not contracts:
+            st.info("Aucun contrat enregistré.")
+            return
+
+        selected_id = _get_selected_contract_id(contracts)
+
+        if selected_id:
+            contract = contract_service.get_contract_by_id(selected_id)
+            if not contract:
+                st.error("Contrat introuvable.")
+                return
+
+            _display_contract_header(contract)
+            _display_contract_details(contract)
 
 
 if __name__ == "__main__":

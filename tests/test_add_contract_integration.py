@@ -67,7 +67,7 @@ class TestAddContractIntegration(unittest.TestCase):
         # Verify session state was updated
         self.assertIn("extracted_data", mock_st.session_state)
         self.assertEqual(mock_st.session_state["extracted_data"], {"extracted": "data"})
-        self.assertEqual(mock_st.session_state["extraction_done"], True)
+        self.assertTrue(mock_st.session_state["extraction_done"])
         self.assertTrue(mock_st.rerun.called)
 
     @patch("src.pages.add_contract.st")

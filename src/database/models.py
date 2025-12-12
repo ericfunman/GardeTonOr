@@ -102,7 +102,7 @@ class ExtractionLog(Base):
 
     # Métadonnées
     created_at = Column(DateTime, default=datetime.utcnow)
-    success = Column(Integer, default=1)  # 1 = succès, 0 = échec
+    success = Column(Integer, default=1)
     error_message = Column(Text, nullable=True)
 
     def __repr__(self):
