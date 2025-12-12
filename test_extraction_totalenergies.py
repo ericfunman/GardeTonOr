@@ -9,10 +9,13 @@ load_dotenv(override=True)
 from src.services.pdf_service import PDFService
 from src.services.openai_service import OpenAIService
 
+
 def test_extraction():
     # Path to the PDF
-    pdf_path = Path(r"c:\Users\lapin\OneDrive\Documents\Developpement\GardeTonOr\Contrats\TotalEnergies.pdf")
-    
+    pdf_path = Path(
+        r"c:\Users\lapin\OneDrive\Documents\Developpement\GardeTonOr\Contrats\TotalEnergies.pdf"
+    )
+
     if not pdf_path.exists():
         print(f"Error: File not found at {pdf_path}")
         return
@@ -41,20 +44,20 @@ def test_extraction():
         openai_service = OpenAIService()
         # Using 'electricite' as default for TotalEnergies
         result = openai_service.extract_contract_data(pdf_text, "electricite")
-        
+
         print("\n--- Extraction Result ---")
         print(json.dumps(result["data"], indent=2, ensure_ascii=False))
-        
+
         # Check for empty fields
         data = result["data"]
         empty_fields = []
-        
+
         # Check some key fields
         if not data.get("electricite", {}).get("pdl"):
             empty_fields.append("electricite.pdl")
         if not data.get("electricite", {}).get("tarifs", {}).get("prix_kwh_ttc"):
             empty_fields.append("electricite.tarifs.prix_kwh_ttc")
-            
+
         if empty_fields:
             print(f"\nWARNING: Some fields are empty: {empty_fields}")
         else:
@@ -62,6 +65,7 @@ def test_extraction():
 
     except Exception as e:
         print(f"Error calling OpenAI: {e}")
+
 
 if __name__ == "__main__":
     test_extraction()

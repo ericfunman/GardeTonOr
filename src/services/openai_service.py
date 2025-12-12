@@ -167,7 +167,9 @@ class OpenAIService:
             return {"analysis": comparison_result, "prompt": prompt, "raw_response": result}
 
         except Exception as e:
-            raise OpenAIServiceError(f"Erreur lors de la comparaison avec concurrent: {str(e)}") from e
+            raise OpenAIServiceError(
+                f"Erreur lors de la comparaison avec concurrent: {str(e)}"
+            ) from e
 
     def _get_contract_schema(self, contract_type: str) -> Dict[str, Any]:
         """Retourne le schéma JSON générique normalisé selon le type de contrat."""

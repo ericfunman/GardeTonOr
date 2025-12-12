@@ -2,6 +2,7 @@ from datetime import datetime
 from src.database.database import get_db
 from src.database.models import Contract
 
+
 def insert_phone_contract():
     # Cleanup previous attempt
     with get_db() as db:
@@ -19,7 +20,7 @@ def insert_phone_contract():
             "telephone": "06 68 31 79 46",
             "email": "",
             "date_naissance": "",
-            "reference_client": ""
+            "reference_client": "",
         },
         "forfait_nom": "Forfait B&You 200 Go 5G",
         "data_go": 200,
@@ -32,9 +33,9 @@ def insert_phone_contract():
         "options": [
             "25 Go Europe/DOM/USA/Canada/Suisse",
             "Appels illimités vers mobiles USA/Canada/Suisse",
-            "5G inclus"
+            "5G inclus",
         ],
-        "conditions_particulieres": "Appels illimités depuis France vers France/DOM. SMS illimités."
+        "conditions_particulieres": "Appels illimités depuis France vers France/DOM. SMS illimités.",
     }
 
     # Parse dates
@@ -48,14 +49,15 @@ def insert_phone_contract():
         anniversary_date=anniversary_date,
         contract_data=contract_data,
         original_filename="Import Manuel Téléphone",
-        validated=1
+        validated=1,
     )
 
     with get_db() as db:
         db.add(contract)
         pass
-    
+
     print(f"Contrat téléphone ajouté avec succès !")
+
 
 if __name__ == "__main__":
     insert_phone_contract()

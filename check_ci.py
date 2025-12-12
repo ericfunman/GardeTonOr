@@ -10,18 +10,17 @@ REPO_OWNER = "ericfunman"
 REPO_NAME = "GardeTonOr"
 GITHUB_API_URL = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}"
 
+
 def get_current_branch():
     try:
         result = subprocess.run(
-            ["git", "rev-parse", "--abbrev-ref", "HEAD"],
-            capture_output=True,
-            text=True,
-            check=True
+            ["git", "rev-parse", "--abbrev-ref", "HEAD"], capture_output=True, text=True, check=True
         )
         return result.stdout.strip()
     except subprocess.CalledProcessError:
         print("Error: Could not determine current git branch.")
         sys.exit(1)
+
 
 def get_latest_run(branch, token=None):
     headers = {"Accept": "application/vnd.github.v3+json"}
@@ -34,20 +33,20 @@ def get_latest_run(branch, token=None):
 
     try:
         response = requests.get(url, headers=headers, params=params)
-        
+
         # Handle rate limiting explicitly
         if response.status_code == 403 and "rate limit" in response.text.lower():
-             print("\n⚠️ GitHub API Rate Limit Exceeded.")
-             if not token:
-                 print("Tip: Provide a GITHUB_TOKEN to increase the limit.")
-             sys.exit(1)
+            print("\n⚠️ GitHub API Rate Limit Exceeded.")
+            if not token:
+                print("Tip: Provide a GITHUB_TOKEN to increase the limit.")
+            sys.exit(1)
 
         response.raise_for_status()
         data = response.json()
-        
+
         if not data["workflow_runs"]:
             return None
-            
+
         return data["workflow_runs"][0]
     except requests.exceptions.RequestException as e:
         print(f"Error querying GitHub API: {e}")
@@ -57,28 +56,29 @@ def get_latest_run(branch, token=None):
             print("Unauthorized. Please check your GITHUB_TOKEN.")
         sys.exit(1)
 
+
 def monitor_run(run_id, token=None):
     headers = {"Accept": "application/vnd.github.v3+json"}
     if token:
         headers["Authorization"] = f"token {token}"
-        
+
     url = f"{GITHUB_API_URL}/actions/runs/{run_id}"
-    
+
     print(f"Monitoring Workflow Run ID: {run_id}")
     print(f"URL: https://github.com/{REPO_OWNER}/{REPO_NAME}/actions/runs/{run_id}")
-    
+
     while True:
         try:
             response = requests.get(url, headers=headers)
             response.raise_for_status()
             data = response.json()
-            
+
             status = data["status"]
             conclusion = data["conclusion"]
-            
+
             sys.stdout.write(f"\rStatus: {status}...")
             sys.stdout.flush()
-            
+
             if status in ["completed", "failure", "cancelled", "skipped", "timed_out"]:
                 print(f"\nFinal Result: {conclusion.upper()}")
                 if conclusion == "success":
@@ -86,25 +86,26 @@ def monitor_run(run_id, token=None):
                 else:
                     get_failure_details(run_id, token)
                     sys.exit(1)
-            
+
             time.sleep(5)
-            
+
         except requests.exceptions.RequestException as e:
             print(f"\nError polling run status: {e}")
             time.sleep(10)
+
 
 def get_failure_details(run_id, token=None):
     headers = {"Accept": "application/vnd.github.v3+json"}
     if token:
         headers["Authorization"] = f"token {token}"
-    
+
     url = f"{GITHUB_API_URL}/actions/runs/{run_id}/jobs"
-    
+
     try:
         response = requests.get(url, headers=headers)
         response.raise_for_status()
         data = response.json()
-        
+
         print("\n--- Failure Details ---")
         for job in data.get("jobs", []):
             if job["conclusion"] == "failure":
@@ -117,22 +118,27 @@ def get_failure_details(run_id, token=None):
     except Exception as e:
         print(f"Could not fetch failure details: {e}")
 
+
 def main():
-    parser = argparse.ArgumentParser(description="Check GitHub Actions status for the current branch.")
-    parser.add_argument("--token", help="GitHub Personal Access Token (or set GITHUB_TOKEN env var)")
+    parser = argparse.ArgumentParser(
+        description="Check GitHub Actions status for the current branch."
+    )
+    parser.add_argument(
+        "--token", help="GitHub Personal Access Token (or set GITHUB_TOKEN env var)"
+    )
     parser.add_argument("--watch", action="store_true", help="Poll until the workflow completes")
     args = parser.parse_args()
 
     token = args.token or os.environ.get("GITHUB_TOKEN")
     branch = get_current_branch()
-    
+
     print(f"Checking CI status for branch: {branch}")
-    
+
     # Wait a moment for GitHub to register the new run if we just pushed
     print("Fetching latest run...")
-    
+
     run = get_latest_run(branch, token)
-    
+
     if not run:
         print("No workflow runs found for this branch.")
         return
@@ -140,13 +146,14 @@ def main():
     print(f"Latest Run: {run['name']} (#{run['run_number']})")
     print(f"Commit: {run['head_commit']['message']}")
     print(f"Status: {run['status']}")
-    if run['conclusion']:
+    if run["conclusion"]:
         print(f"Conclusion: {run['conclusion']}")
-        if run['conclusion'] == "failure":
-            get_failure_details(run['id'], token)
-    
-    if args.watch and run['status'] not in ["completed"]:
-        monitor_run(run['id'], token)
+        if run["conclusion"] == "failure":
+            get_failure_details(run["id"], token)
+
+    if args.watch and run["status"] not in ["completed"]:
+        monitor_run(run["id"], token)
+
 
 if __name__ == "__main__":
     main()

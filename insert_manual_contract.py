@@ -2,6 +2,7 @@ from datetime import datetime
 from src.database.database import get_db
 from src.database.models import Contract
 
+
 def insert_contract():
     contract_data = {
         "type_contrat": "assurance_habitation",
@@ -12,7 +13,7 @@ def insert_contract():
             "email": "",
             "telephone": "",
             "date_naissance": "",
-            "reference_client": ""
+            "reference_client": "",
         },
         "bien_assure": {
             "adresse": "18 B allée Valere Lefebvre 93340 le Raincy",
@@ -25,33 +26,23 @@ def insert_contract():
             "veranda": False,
             "cheminee": False,
             "piscine": True,
-            "systeme_securite": True
+            "systeme_securite": True,
         },
         "garanties_incluses": [
             "Formule Confort",
             "Dommages électriques",
             "Rééquipement à neuf",
-            "Piscine"
+            "Piscine",
         ],
-        "capitaux": {
-            "capital_mobilier": 90300,
-            "objets_valeur": 9030
-        },
-        "franchises": {
-            "franchise_generale": 0,
-            "franchise_cat_nat": 0
-        },
-        "tarifs": {
-            "prime_annuelle_ttc": 923.22,
-            "prime_mensuelle_ttc": 0.0,
-            "frais_dossier": 0.0
-        },
+        "capitaux": {"capital_mobilier": 90300, "objets_valeur": 9030},
+        "franchises": {"franchise_generale": 0, "franchise_cat_nat": 0},
+        "tarifs": {"prime_annuelle_ttc": 923.22, "prime_mensuelle_ttc": 0.0, "frais_dossier": 0.0},
         "dates": {
             "signature_contrat": "01/07/2015",
             "date_debut": "01/07/2015",
             "date_anniversaire": "01/07/2026",
-            "retractation_limite": ""
-        }
+            "retractation_limite": "",
+        },
     }
 
     # Parse dates for the main columns
@@ -65,18 +56,19 @@ def insert_contract():
         anniversary_date=anniversary_date,
         contract_data=contract_data,
         original_filename="Import Manuel",
-        validated=1
+        validated=1,
     )
 
     with get_db() as db:
         db.add(contract)
-        # Commit is handled by the context manager, but explicit commit is fine too if needed, 
+        # Commit is handled by the context manager, but explicit commit is fine too if needed,
         # though get_db does it on exit.
         # However, to get the ID, we might need to flush or commit.
         # get_db commits on exit.
         pass
-    
+
     print(f"Contrat ajouté avec succès !")
+
 
 if __name__ == "__main__":
     insert_contract()
