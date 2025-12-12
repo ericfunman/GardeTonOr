@@ -4,6 +4,7 @@ from unittest.mock import Mock, patch
 import json
 from src.services.openai_service import OpenAIService
 
+
 class TestOpenAIServiceComparison:
     """Tests pour les méthodes de comparaison."""
 
@@ -22,7 +23,7 @@ class TestOpenAIServiceComparison:
             "prix_mensuel": 50.0,
             "data_go": 10
         }
-        
+
         expected_analysis = {
             "recommandation": "Changer",
             "justification": "Trop cher pour 10Go",
@@ -32,7 +33,7 @@ class TestOpenAIServiceComparison:
                 "economie_potentielle": 35.0
             }
         }
-        
+
         mock_response = Mock()
         mock_choice = Mock()
         mock_choice.message.content = json.dumps(expected_analysis)
@@ -40,7 +41,7 @@ class TestOpenAIServiceComparison:
         mock_openai_client.chat.completions.create.return_value = mock_response
 
         result = service.compare_with_market(contract_data, "telephone")
-        
+
         assert result["analysis"] == expected_analysis
         assert "telephone" in result["prompt"]
         assert "Orange" in result["prompt"]
@@ -53,7 +54,7 @@ class TestOpenAIServiceComparison:
             "prix_kwh": 0.25,
             "puissance_souscrite_kva": 6
         }
-        
+
         expected_analysis = {
             "recommandation": "Garder",
             "justification": "Prix compétitif",
@@ -63,7 +64,7 @@ class TestOpenAIServiceComparison:
                 "economie_potentielle": 0.01
             }
         }
-        
+
         mock_response = Mock()
         mock_choice = Mock()
         mock_choice.message.content = json.dumps(expected_analysis)
@@ -71,7 +72,7 @@ class TestOpenAIServiceComparison:
         mock_openai_client.chat.completions.create.return_value = mock_response
 
         result = service.compare_with_market(contract_data, "electricite")
-        
+
         assert result["analysis"] == expected_analysis
         assert "electricite" in result["prompt"]
 
@@ -80,12 +81,12 @@ class TestOpenAIServiceComparison:
         service = OpenAIService(api_key="test")
         contract_data = {"prix": 100}
         competitor_data = {"prix": 80}
-        
+
         expected_analysis = {
             "recommandation": "Changer pour le concurrent",
             "economie": 20
         }
-        
+
         mock_response = Mock()
         mock_choice = Mock()
         mock_choice.message.content = json.dumps(expected_analysis)
@@ -93,7 +94,7 @@ class TestOpenAIServiceComparison:
         mock_openai_client.chat.completions.create.return_value = mock_response
 
         result = service.compare_with_competitor(contract_data, competitor_data, "telephone")
-        
+
         assert result["analysis"] == expected_analysis
         assert "concurrent" in result["prompt"]
 

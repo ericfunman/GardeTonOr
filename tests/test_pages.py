@@ -155,11 +155,6 @@ def test_add_contract_extraction(db_session, sample_contract_data_telephone):
         # Check if file uploader exists
         # Note: AppTest dynamic attributes might be tricky.
         # We check if the text "Choisissez un fichier PDF" is present in the page
-        found_text = False
-        for md in at.markdown:
-            if "Choisissez un fichier PDF" in md.value: # This is in help or label, might be in other elements
-                found_text = True
-                break
         
         # Actually, file_uploader label is passed to the widget.
         # Let's check if we can find the widget by type if attribute access fails

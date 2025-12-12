@@ -5,6 +5,7 @@ import json
 
 from src.services.openai_service import OpenAIService
 
+
 class TestOpenAIServiceExtended:
     """Tests supplémentaires pour couvrir tous les types de contrats."""
 
@@ -40,7 +41,7 @@ class TestOpenAIServiceExtended:
             "prix_kwh": {"base": 0.20},
             "prix_abonnement_mensuel": 15.0
         }
-        
+
         mock_response = Mock()
         mock_choice = Mock()
         mock_choice.message.content = json.dumps(expected_data)

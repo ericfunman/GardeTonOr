@@ -365,6 +365,7 @@ class TestComparePageExtended(TestComparePage):
 
                 assert found, "Résultat de l'analyse non trouvé"
 
+
 class TestDashboardPageExtended:
     """Tests supplémentaires pour DashboardPage."""
 
@@ -383,11 +384,11 @@ class TestDashboardPageExtended:
         db_session.commit()
 
         at = AppTest.from_file("src/pages/dashboard.py")
-        
+
         with patch("src.database.get_db") as mock_get_db:
             mock_get_db.side_effect = lambda: mock_get_db_context(db_session)
             at.run(timeout=10)
-            
+
             # Vérifier les métriques
             assert len(at.metric) > 0
             # Vérifier "Total Contrats"
@@ -409,11 +410,11 @@ class TestDashboardPageExtended:
         db_session.commit()
 
         at = AppTest.from_file("src/pages/dashboard.py")
-        
+
         with patch("src.database.get_db") as mock_get_db:
             mock_get_db.side_effect = lambda: mock_get_db_context(db_session)
             at.run(timeout=10)
-            
+
             # Vérifier que le contrat est affiché dans la liste
             # Le dashboard utilise des colonnes et du markdown, pas des expanders
             found_provider = False
@@ -421,5 +422,6 @@ class TestDashboardPageExtended:
                 if "Free Mobile" in m.value:
                     found_provider = True
                     break
-            
+
             assert found_provider, "Le fournisseur 'Free Mobile' n'est pas affiché dans le dashboard"
+

@@ -13,7 +13,7 @@ def db_engine(tmp_path):
     # Utiliser un fichier temporaire pour permettre le partage entre threads (AppTest)
     db_path = tmp_path / "test.db"
     engine = create_engine(
-        f"sqlite:///{db_path}", 
+        f"sqlite:///{db_path}",
         connect_args={"check_same_thread": False}
     )
     Base.metadata.create_all(bind=engine)

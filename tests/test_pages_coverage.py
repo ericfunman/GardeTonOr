@@ -4,8 +4,7 @@ from unittest.mock import Mock, patch, MagicMock
 from datetime import datetime
 from contextlib import contextmanager
 from streamlit.testing.v1 import AppTest
-from src.database.database import get_db
-from src.services.contract_service import ContractService
+
 
 @contextmanager
 def mock_get_db_context(db_session):
